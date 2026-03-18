@@ -1,0 +1,101 @@
+# ==============================
+# 🐍 Python
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ==============================
+# 📦 Packaging / Build
+# ==============================
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ==============================
+# 📊 Data (IMPORTANT)
+# ==============================
+data/raw/
+data/processed/
+data/scenarios/
+
+# Keep folder structure but ignore files
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/scenarios/.gitkeep
+
+# ==============================
+# 🧪 Testing / Coverage
+# ==============================
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ==============================
+# 🧠 ML / Notebooks
+# ==============================
+.ipynb_checkpoints/
+
+# ==============================
+# ⚙️ Environment variables
+# ==============================
+.env
+.env.*
+!.env.example
+
+# ==============================
+# 🧰 IDE / Editor
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==============================
+# 🖥️ OS Files
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# 🚀 Logs
+# ==============================
+*.log
+
+# ==============================
+# 📦 Cache / Temp
+# ==============================
+.cache/
+*.tmp
+
+# ==============================
+# 🐳 Docker
+# ==============================
+docker-compose.override.yml
+
+# ==============================
+# 📈 Streamlit
+# ==============================
+.streamlit/secrets.toml
+
+# ==============================
+# 🔧 Ruff / MyPy
+# ==============================
+.mypy_cache/
+.ruff_cache/
+
+# ==============================
+# 🔥 Misc
+# ==============================
+*.sqlite
+*.db
