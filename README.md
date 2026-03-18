@@ -1,86 +1,41 @@
-# **Referee: Decision Comparison Tool (Week 6 Project)**
+# **🚀 StackWise AI**
 
   
 
-**Author:**  Aditya Singh
+### **Explainable Decision Intelligence Platform for Architecture & Infrastructure Selection**
 
-**Project Type:**  Rule-based decision support tool
+  
 
-**Tech Stack:**  Python, Streamlit, Pandas
+StackWise AI is a full-stack decision-analysis platform that helps engineers choose the optimal infrastructure stack using a combination of:
+
+-   Constraint-based filtering
+    
+-   Weighted multi-criteria decision analysis (MCDA)
+    
+-   Sensitivity analysis
+    
+-   Pareto optimization
+    
+-   Confidence scoring
+    
+-   Data-driven ecosystem evidence
+    
 
 ----------
 
-## **📌 Overview**
+## **⚡ Problem Statement**
 
   
 
-**Referee**  is a decision-support web application that helps users  **compare multiple technical options side-by-side**  instead of giving a single generic recommendation.
+Choosing the right infrastructure (e.g., ECS vs EKS vs Lambda) is complex and often subjective.
 
   
 
-Users:
-
--   Select two or more options (e.g., ECS vs EKS vs Lambda)
-    
--   Define  **hard requirements**  (e.g., “Need Kubernetes”)
-    
--   Assign  **weights**  to decision criteria (cost, scalability, portability, etc.)
-    
+StackWise AI transforms this into a:
 
   
 
-The tool then:
-
--   Filters out invalid options
-    
--   Calculates weighted scores
-    
--   Displays comparisons in tables
-    
--   Explains  _why_  one option wins over others
-    
-
-  
-
-This project demonstrates  **structured decision-making**, not AI guessing.
-
-----------
-
-## **🎯 Problem Statement**
-
-  
-
-When choosing between technical options, users often face:
-
--   Conflicting trade-offs
-    
--   One-size-fits-all recommendations
-    
--   No explanation of  _why_  one choice is better
-    
-
-  
-
-Most tools give  **answers**, not  **decisions**.
-
-----------
-
-## **✅ Solution**
-
-  
-
-Referee acts as a  **neutral referee**:
-
--   Applies **hard constraints**
-    
--   Uses **weighted scoring**
-    
--   Clearly explains  **trade-offs**
-    
-
-  
-
-The result is a transparent, user-controlled decision process.
+> **Structured, explainable, and data-informed decision-making process**
 
 ----------
 
@@ -88,197 +43,527 @@ The result is a transparent, user-controlled decision process.
 
   
 
-### **1. Option Catalog**
+### **1. Input**
 
   
 
-Each option (ECS, EKS, Lambda) is defined in a JSON catalog with:
+Users define:
 
--   Description
+-   Options (ECS, EKS, Lambda)
     
--   Strengths & weaknesses
+-   Constraints (Kubernetes, ops capacity, vendor neutrality)
     
--   Scores (1–10) for key criteria
-    
--   Hard constraints (e.g., Kubernetes requirement)
-    
-
-  
-
-### **2. Hard Constraints Check**
-
-  
-
-If a user requires Kubernetes:
-
--   Options that do not support Kubernetes are automatically rejected
-    
-
-  
-
-### **3. Weighted Scoring**
-
-  
-
-Each criterion is multiplied by its user-defined weight.
-
-  
-
-**Example:**
-
-```
-Total Score = Σ (criterion score × weight) / total weights
-```
-
-### **4. Trade-off Explanation**
-
-  
-
-The tool explains the winner in simple English based on:
-
--   The user’s most important criteria
-    
--   Score differences
+-   Weights (cost, scalability, portability, etc.)
     
 
 ----------
 
-## **🧪 Example Use Case**
-
--   Compare **ECS vs EKS**
-    
--   Set  **portability**  weight very high →  **EKS wins**
-    
--   Set  **ops simplicity**  weight very high →  **ECS wins**
-    
--   Enable “Need Kubernetes” →  **Only EKS remains valid**
-    
+### **2. Decision Engine**
 
   
 
-This “flip” proves the tool supports real decision-making.
+The system evaluates options using:
+
+-   ✅ Hard constraints (elimination)
+    
+-   ⚖️ Weighted scoring (MCDA)
+    
+-   📉 Penalty adjustments
+    
+-   📊 Evidence-based boosts (from GitHub dataset)
+    
+-   🔍 Sensitivity analysis
+    
+-   📈 Confidence estimation
+    
+-   🧠 Natural language explanation
+    
 
 ----------
 
-## **🖥️ Tech Stack**
+### **3. Output**
 
--   **Streamlit**  – Web UI
+-   🏆 Ranked recommendations
     
--   **Pandas**  – Tables & structured output
+-   🧾 Explanation (why this option wins)
     
--   **Python**  – Core logic
+-   🔍 Sensitivity insights
     
--   **JSON**  – Knowledge catalog
+-   📊 Trade-off visualization
     
+-   📈 Confidence score
+    
+-   ⚖️ Pareto frontier
+    
+
+----------
+
+## **🏗️ Architecture**
+
+```mermaid
+
+flowchart  LR
+
+%% =========================
+
+%% USER & FRONTEND
+
+%% =========================
+
+U[👤 User] --> UI[🎨 Streamlit  UI<br/>app/main.py]
 
   
 
-❌ No databases
+%% =========================
 
-❌ No ML models
+%% API LAYER
 
-❌ No cloud SDKs
+%% =========================
 
-----------
+UI  -->|POST /evaluate| API[⚡ FastAPI  Backend<br/>api/main.py]
 
-## **📁 Project Structure**
+UI  -->|GET /pareto| API
+
+UI  -->|Scenario  APIs| API
+
+  
+
+subgraph  API_LAYER [🌐 API  Layer]
+
+API  --> R1[Evaluate  Route]
+
+API  --> R2[Pareto  Route]
+
+API  --> R3[Scenario  Routes]
+
+API  --> SCH[Pydantic  Schemas]
+
+end
+
+  
+
+%% =========================
+
+%% DECISION ENGINE
+
+%% =========================
+
+subgraph  ENGINE [🧠 Decision  Engine]
+
+C1[Constraints  Engine]
+
+C2[Scoring  Engine]
+
+C3[Sensitivity  Analysis]
+
+C4[Confidence  Scoring]
+
+C5[Explanation  Engine]
+
+C6[Pareto  Optimization]
+
+C7[Scenario  Manager]
+
+C8[Evidence  Integration]
+
+end
+
+  
+
+R1  --> C1
+
+R1  --> C2
+
+R1  --> C3
+
+R1  --> C4
+
+R1  --> C5
+
+R2  --> C6
+
+R3  --> C7
+
+R1  --> C8
+
+  
+
+%% =========================
+
+%% DATA LAYER
+
+%% =========================
+
+subgraph  DATA [📊 Data  Layer]
+
+D1[Raw  GitHub  Dataset<br/>Parquet]
+
+D2[Processed  Features]
+
+D3[Language  Benchmarks]
+
+D4[Saved  Scenarios]
+
+D5[Options  Catalog]
+
+end
+
+  
+
+%% =========================
+
+%% PIPELINES
+
+%% =========================
+
+subgraph  PIPELINES [⚙️ Data  Pipelines]
+
+P1[convert_dataset.py]
+
+P2[inspect_dataset.py]
+
+P3[build_features.py]
+
+end
+
+  
+
+D1  --> P1  --> D2
+
+D2  --> P3  --> D3
+
+D1  --> P2
+
+  
+
+%% =========================
+
+%% CONNECTIONS
+
+%% =========================
+
+C8  --> D3
+
+C7  --> D4
+
+C2  --> D5
+
+  
+
+%% =========================
+
+%% OUTPUT
+
+%% =========================
+
+C2  --> RES[📈 Ranked  Results]
+
+C3  --> RES
+
+C4  --> RES
+
+C5  --> RES
+
+C6  --> RES
+
+  
+
+RES  --> API  --> UI
 
 ```
-referee-tool/
-├── .kiro/
-│   └── README.md
-├── catalog/
-│   └── options.json
-├── evaluator/
-│   ├── constraints.py
-│   ├── scoring.py
-│   └── explain.py
-├── tests/
-│   └── test_scoring.py
-├── app.py
+
+
+
+----------
+
+## **📂 Project Structure**
+
+```
+StackWise-AI/
+├── api/                # FastAPI backend
+├── app/                # Streamlit frontend
+├── core/               # Decision engine logic
+├── pipelines/          # Data processing pipelines
+├── data/               # Raw + processed datasets
+├── tests/              # Unit tests
+├── catalog/            # Option definitions
 ├── requirements.txt
+├── pyproject.toml
 └── README.md
 ```
 
+
 ----------
 
-## **⚙️ Installation**
+## **🔧 Tech Stack**
 
   
 
-### **1. Clone the repository**
+### **Backend**
+
+-   FastAPI
+    
+-   Pydantic
+    
+
+  
+
+### **Frontend**
+
+-   Streamlit
+    
+-   Plotly
+    
+
+  
+
+### **Data Layer**
+
+-   Polars
+    
+-   PyArrow
+    
+-   Parquet datasets (Hugging Face)
+    
+
+  
+
+### **Core Logic**
+
+-   Custom decision engine (MCDA)
+    
+-   Constraint-based filtering
+    
+-   Sensitivity analysis
+    
+-   Pareto optimization
+    
+
+  
+
+### **Quality**
+
+-   Pytest
+    
+-   Ruff (linting)
+    
+
+----------
+
+## **📊 Dataset**
+
+  
+
+This project uses GitHub repository metadata:
+
+  
+
+👉 https://huggingface.co/datasets/ibragim-bad/github-repos-metadata-40M
+
+  
+
+Used for:
+
+-   Ecosystem strength estimation
+    
+-   Language popularity signals
+    
+-   Evidence-based scoring adjustments
+    
+
+----------
+
+## **🚀 Running the Project**
+
+  
+
+### **1️⃣ Setup Environment**
 
 ```
-git clone <your-github-repo-url>
-cd referee-tool
-```
-
-### **2. Install dependencies**
-
-```
+python -m venv venv
+source venv/bin/activate  # Mac/Linux
 pip install -r requirements.txt
 ```
 
 ----------
 
-## **▶️ Run the Application**
+### **2️⃣ Run Backend**
 
 ```
-streamlit run app.py
+uvicorn api.main:app --reload
 ```
 
-The browser will open automatically.
+API Docs:
+
+```
+http://127.0.0.1:8000/docs
+```
 
 ----------
 
-## **🧪 Run Tests (Optional)**
+### **3️⃣ Run Frontend**
 
 ```
-python -m pytest
+streamlit run app/main.py
 ```
-
-Tests verify that score rankings flip correctly when weights change.
 
 ----------
 
-## **📸 Screenshots & Demo**
+## **🧪 Example API Request**
+
+```
+{
+  "options": ["ECS", "EKS", "Lambda"],
+  "constraints": {
+    "need_kubernetes": true,
+    "low_ops_capacity": false,
+    "vendor_neutrality": false
+  },
+  "weights": {
+    "cost": 0.2,
+    "scalability": 0.3,
+    "portability": 0.2,
+    "ops_simplicity": 0.15,
+    "time_to_market": 0.15
+  }
+}
+```
+
+----------
+
+## **🧪 Testing**
 
   
 
-Screenshots included in the repository:
+Run tests:
 
--   Input form
+```
+pytest
+```
+
+Covers:
+
+-   Scoring logic
     
--   Comparison results
+-   Pareto correctness
     
--   Score flip based on weight changes
+-   Confidence computation
     
+
+----------
+
+## **🔍 Key Features**
 
   
 
-(Used for blog and project submission proof.)
+### **✅ Explainable Decisions**
+
+  
+
+Clear reasoning for every recommendation.
+
+  
+
+### **📉 Sensitivity Analysis**
+
+  
+
+Understand how weight changes affect outcomes.
+
+  
+
+### **⚖️ Pareto Frontier**
+
+  
+
+Avoid dominated (inferior) solutions.
+
+  
+
+### **📈 Confidence Score**
+
+  
+
+Measures reliability of the decision.
+
+  
+
+### **💾 Scenario Saving**
+
+  
+
+Store and reload decision scenarios.
+
+  
+
+### **📊 Data-Driven Evidence**
+
+  
+
+Uses real GitHub data to adjust scores.
+
+----------
+
+## **💡 Why This Project Stands Out**
+
+  
+
+Unlike basic comparison tools, StackWise AI:
+
+-   Combines **system design + data engineering + AI reasoning**
+    
+-   Uses **explainable decision modeling (not black-box ML)**
+    
+-   Handles **large-scale datasets efficiently (Polars + Parquet)**
+    
+-   Provides **production-style API + interactive UI**
+    
+
+----------
+
+## **🎯 Use Cases**
+
+-   Infrastructure selection (ECS vs EKS vs Lambda)
+    
+-   Technology stack decisions
+    
+-   Architecture trade-off analysis
+    
+-   Engineering decision support systems
+    
 
 ----------
 
 ## **🚀 Future Improvements**
 
--   Add more comparison domains (databases, networking, APIs)
+-   ML-based scoring refinement
     
--   Export results as PDF
+-   Embedding-based architecture recommendations
     
--   Persist user scenarios
+-   Multi-domain expansion (databases, APIs, cloud vendors)
     
--   Add radar charts for visual comparison
+-   User authentication + saved dashboards
+    
+-   Deployment (Docker + cloud hosting)
     
 
 ----------
 
-## **👤 Author**
+## **👨‍💻 Author**
 
   
 
-**Aditya Singh**
+Aditya Singh
 
-Week-6 Referee Project
+----------
 
-Built as part of a structured decision-making exercise.
+## **⭐ If you found this useful**
+
+  
+
+Give this repo a ⭐ — it helps a lot!
+
+----------
+
+
+
