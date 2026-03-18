@@ -1,16 +1,14 @@
+CRITERIA = ["cost", "scalability", "portability", "ops_simplicity", "time_to_market"]
+
+
 def is_dominated(a, b):
-    return all(b[k] >= a[k] for k in a) and any(b[k] > a[k] for k in a)
+    return (
+        all(b[k] >= a[k] for k in CRITERIA) and
+        any(b[k] > a[k] for k in CRITERIA)
+    )
 
 
 def pareto_frontier(options_scores):
-    """
-    options_scores:
-    [
-        {"name": "EKS", "cost": 0.6, "scalability": 0.9},
-        ...
-    ]
-    """
-
     pareto = []
 
     for i, opt in enumerate(options_scores):

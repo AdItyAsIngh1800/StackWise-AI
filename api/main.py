@@ -1,16 +1,17 @@
 from fastapi import FastAPI
 from api.routes.evaluate import router as evaluate_router
+from api.routes.pareto import router as pareto_router
 
 app = FastAPI(
-    title="Referee Tool API",
-    description="Decision-analysis engine for infrastructure recommendation",
+    title="StackWise AI",
+    description="Explainable Decision Intelligence Platform",
     version="0.2.0"
 )
 
-# Register routes
 app.include_router(evaluate_router)
+app.include_router(pareto_router)
 
 
 @app.get("/")
 def root():
-    return {"message": "Referee Tool API is running"}
+    return {"message": "StackWise AI API is running"}

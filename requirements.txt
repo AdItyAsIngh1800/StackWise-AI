@@ -51,6 +51,7 @@ tenacity
 tornado
 watchdog
 narwhals
+plotly
 
 # Testing (optional - remove in production if not needed)
 pytest

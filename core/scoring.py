@@ -1,11 +1,3 @@
-def normalize_weights(weights):
-    total = sum(weights.values())
-    if total == 0:
-        raise ValueError("Weights sum cannot be zero")
-    return {k: v / total for k, v in weights.items()}
-
-
-# Base scores for options (can improve later using data)
 BASE_SCORES = {
     "ECS": {
         "cost": 0.7,
@@ -31,13 +23,22 @@ BASE_SCORES = {
 }
 
 
+def normalize_weights(weights):
+    total = sum(weights.values())
+    if total <= 0:
+        raise ValueError("Weights sum must be greater than zero.")
+    return {k: v / total for k, v in weights.items()}
+
+
 def score_option(option, weights):
     scores = BASE_SCORES.get(option)
-
-    if not scores:
+    if scores is None:
         raise ValueError(f"Unknown option: {option}")
 
-    return sum(weights[k] * scores[k] for k in weights)
+    total = 0.0
+    for criterion, weight in weights.items():
+        total += weight * scores[criterion]
+    return total
 
 
 def rank_options(options, weights, penalties):
@@ -45,13 +46,25 @@ def rank_options(options, weights, penalties):
 
     for opt in options:
         base_score = score_option(opt, weights)
-        penalty = penalties.get(opt, 0)
-
+        penalty = penalties.get(opt, 0.0)
         final_score = base_score + penalty
 
-        results.append({
-            "name": opt,
-            "score": round(final_score, 3)
-        })
+        results.append(
+            {
+                "name": opt,
+                "base_score": round(base_score, 3),
+                "penalty": round(penalty, 3),
+                "score": round(final_score, 3),
+            }
+        )
 
     return sorted(results, key=lambda x: x["score"], reverse=True)
+
+
+def get_option_tradeoff_view(options):
+    rows = []
+    for opt in options:
+        row = {"name": opt}
+        row.update(BASE_SCORES[opt])
+        rows.append(row)
+    return rows
