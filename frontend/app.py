@@ -115,7 +115,7 @@ if st.sidebar.button("Get Recommendation"):
             with col2:
                 st.info(
                     "Primary recommendation generated from project fit, "
-                    "team fit, ops fit, and ecosystem evidence."
+                    "team fit, ops fit, ecosystem evidence, and stability checks."
                 )
         else:
             st.warning("No recommendation could be generated.")
@@ -123,6 +123,24 @@ if st.sidebar.button("Get Recommendation"):
         st.header("📈 Confidence Score")
         confidence = data.get("confidence", 0.0)
         st.metric("Confidence", confidence)
+
+        st.header("🔍 Sensitivity Analysis")
+        sensitivity = data.get("sensitivity", {})
+
+        if sensitivity:
+            st.write(f"**Base Winner:** {sensitivity.get('base_winner')}")
+            st.write(f"**Stability Score:** {sensitivity.get('stability')}")
+
+            variations = sensitivity.get("variations", [])
+            if variations:
+                for variation in variations:
+                    st.write(
+                        f"- **{variation['scenario']}** → {variation['winner']}"
+                    )
+            else:
+                st.write("No sensitivity variations available.")
+        else:
+            st.write("No sensitivity analysis available.")
 
         st.header("🔄 Alternatives")
         alternatives = data.get("alternatives", [])
