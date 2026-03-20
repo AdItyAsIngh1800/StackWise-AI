@@ -6,7 +6,11 @@ from backend.schemas import (
     RecommendationRequest,
     RecommendationResponse,
 )
-from database.operations import log_recommendation
+from database.operations import (
+    get_scenario_by_id,
+    get_scenarios,
+    log_recommendation,
+)
 from engine.recommend import recommend_stack
 
 
@@ -39,6 +43,8 @@ def root():
             "root": "/",
             "health": "/health",
             "recommend": "/recommend",
+            "scenarios": "/scenarios",
+            "scenario_detail": "/scenario/{scenario_id}",
             "docs": "/docs",
         },
     }
@@ -50,14 +56,32 @@ def health():
 
 
 @app.post("/recommend", tags=["Recommendation"], response_model=RecommendationResponse)
-def recommend(request: RecommendationRequest):
+def recommend(
+    request: RecommendationRequest,
+    scenario_name: str | None = None,
+):
     request_data = request.model_dump()
     result = recommend_stack(request_data)
 
     try:
-        log_recommendation(request_data, result)
+        log_recommendation(request_data, result, scenario_name)
     except Exception as exc:
-        # logging failure should not break recommendation response
+        # Logging failure should not break the recommendation response
         print(f"Database logging failed: {exc}")
 
     return result
+
+
+@app.get("/scenarios", tags=["Scenarios"])
+def list_scenarios():
+    return get_scenarios()
+
+
+@app.get("/scenario/{scenario_id}", tags=["Scenarios"])
+def get_scenario(scenario_id: int):
+    data = get_scenario_by_id(scenario_id)
+
+    if not data:
+        return {"error": "Scenario not found"}
+
+    return data
