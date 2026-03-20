@@ -4,16 +4,12 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-# -----------------------------
-# Request Schema
-# -----------------------------
 class RecommendationRequest(BaseModel):
     project_type: str
     team_languages: List[str] = []
     low_ops: bool = False
     expected_scale: str = "medium"
 
-    # Optional flags
     prefer_enterprise: bool = False
     prototype_only: bool = False
     rapid_schema_changes: bool = False
@@ -21,9 +17,6 @@ class RecommendationRequest(BaseModel):
     prefer_portability: bool = False
 
 
-# -----------------------------
-# Response Schema
-# -----------------------------
 class StackRecommendation(BaseModel):
     language: str
     score: float
@@ -37,3 +30,4 @@ class RecommendationResponse(BaseModel):
     alternatives: List[StackRecommendation]
     ranked_languages: List[dict]
     explanation: Optional[str]
+    confidence: float | None = None
