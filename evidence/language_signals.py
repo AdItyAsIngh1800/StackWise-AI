@@ -10,6 +10,8 @@ from evidence.mappings import normalize_language
 
 
 def _normalize_series(series: pd.Series) -> pd.Series:
+    series = series.fillna(0.0).astype(float)
+
     if series.max() == series.min():
         return pd.Series([0.5] * len(series), index=series.index)
 
@@ -17,8 +19,8 @@ def _normalize_series(series: pd.Series) -> pd.Series:
 
 
 def build_language_signals() -> pd.DataFrame:
-    dist = load_language_distribution()
-    bench = load_language_benchmarks()
+    dist = load_language_distribution().copy()
+    bench = load_language_benchmarks().copy()
 
     # Normalize language names
     dist["language"] = dist["language"].apply(normalize_language)
@@ -27,49 +29,101 @@ def build_language_signals() -> pd.DataFrame:
     dist = dist.dropna(subset=["language"])
     bench = bench.dropna(subset=["language"])
 
-    # Aggregate distribution (popularity)
+    # Aggregate distribution file
     dist_agg = (
-        dist.groupby("language")
-        .agg({"count": "sum"})
-        .rename(columns={"count": "popularity_raw"})
-        .reset_index()
+        dist.groupby("language", as_index=False)
+        .agg(
+            {
+                "repo_count": "sum",
+                "avg_forks": "mean",
+                "avg_watchers": "mean",
+            }
+        )
+        .rename(
+            columns={
+                "repo_count": "dist_repo_count",
+                "avg_forks": "dist_avg_forks",
+                "avg_watchers": "dist_avg_watchers",
+            }
+        )
     )
 
-    # Aggregate benchmarks
+    # Aggregate benchmark file
     bench_agg = (
-        bench.groupby("language")
-        .agg({
-            "stars": "mean",
-            "forks": "mean",
-            "issues": "mean",
-        })
-        .rename(columns={
-            "stars": "maturity_raw",
-            "forks": "activity_raw",
-            "issues": "issues_raw",
-        })
-        .reset_index()
+        bench.groupby("language", as_index=False)
+        .agg(
+            {
+                "repo_count": "sum",
+                "avg_forks": "mean",
+                "avg_watchers": "mean",
+                "avg_size": "mean",
+                "ecosystem_strength_score": "mean",
+            }
+        )
+        .rename(
+            columns={
+                "repo_count": "bench_repo_count",
+                "avg_forks": "bench_avg_forks",
+                "avg_watchers": "bench_avg_watchers",
+                "avg_size": "bench_avg_size",
+                "ecosystem_strength_score": "ecosystem_strength_raw",
+            }
+        )
     )
 
-    # Merge
+    # Merge both evidence sources
     df = pd.merge(dist_agg, bench_agg, on="language", how="outer").fillna(0)
 
-    # Normalize signals
-    df["popularity"] = _normalize_series(df["popularity_raw"])
-    df["maturity"] = _normalize_series(df["maturity_raw"])
-    df["activity"] = _normalize_series(df["activity_raw"])
+    # Normalized evidence signals
+    df["repo_count_norm"] = _normalize_series(
+        df["dist_repo_count"] + df["bench_repo_count"]
+    )
+    df["forks_norm"] = _normalize_series(
+        (df["dist_avg_forks"] + df["bench_avg_forks"]) / 2
+    )
+    df["watchers_norm"] = _normalize_series(
+        (df["dist_avg_watchers"] + df["bench_avg_watchers"]) / 2
+    )
+    df["size_norm"] = _normalize_series(df["bench_avg_size"])
+    df["ecosystem_strength_norm"] = _normalize_series(df["ecosystem_strength_raw"])
 
-    # Composite ecosystem score
-    df["ecosystem"] = (
-        0.4 * df["popularity"]
-        + 0.3 * df["maturity"]
-        + 0.3 * df["activity"]
+    # Final derived signals
+    df["popularity"] = (
+        0.5 * df["repo_count_norm"]
+        + 0.25 * df["watchers_norm"]
+        + 0.25 * df["forks_norm"]
     )
 
-    return df
+    df["maturity"] = (
+        0.5 * df["ecosystem_strength_norm"]
+        + 0.25 * df["watchers_norm"]
+        + 0.25 * df["repo_count_norm"]
+    )
+
+    df["activity"] = (
+        0.5 * df["forks_norm"]
+        + 0.3 * df["watchers_norm"]
+        + 0.2 * df["repo_count_norm"]
+    )
+
+    df["ecosystem"] = (
+        0.4 * df["ecosystem_strength_norm"]
+        + 0.3 * df["repo_count_norm"]
+        + 0.2 * df["watchers_norm"]
+        + 0.1 * df["size_norm"]
+    )
+
+    return df[
+        [
+            "language",
+            "popularity",
+            "maturity",
+            "activity",
+            "ecosystem",
+        ]
+    ]
 
 
-# Cache signals in memory (simple optimization)
 _LANGUAGE_SIGNALS_CACHE: pd.DataFrame | None = None
 
 
@@ -84,7 +138,6 @@ def get_language_signals() -> pd.DataFrame:
 
 def get_language_signal(language: str) -> dict:
     df = get_language_signals()
-
     row = df[df["language"] == language]
 
     if row.empty:
@@ -95,11 +148,14 @@ def get_language_signal(language: str) -> dict:
             "ecosystem": 0.5,
         }
 
-    row = row.iloc[0]
-
+    item = row.iloc[0]
     return {
-        "popularity": float(row["popularity"]),
-        "maturity": float(row["maturity"]),
-        "activity": float(row["activity"]),
-        "ecosystem": float(row["ecosystem"]),
+        "popularity": float(item["popularity"]),
+        "maturity": float(item["maturity"]),
+        "activity": float(item["activity"]),
+        "ecosystem": float(item["ecosystem"]),
     }
+
+
+if __name__ == "__main__":
+    print(get_language_signals().head())

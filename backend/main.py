@@ -16,18 +16,12 @@ app = FastAPI(
 )
 
 
-# -----------------------------
-# Health Check
-# -----------------------------
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
 
-# -----------------------------
-# Recommendation Endpoint
-# -----------------------------
 @app.post("/recommend", response_model=RecommendationResponse)
 def recommend(request: RecommendationRequest):
-    result = recommend_stack(request.dict())
+    result = recommend_stack(request.model_dump())
     return result
