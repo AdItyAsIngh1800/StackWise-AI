@@ -1,0 +1,81 @@
+frameworks:
+  - id: fastapi
+    name: FastAPI
+    language: python
+    description: High-performance Python web framework for building APIs quickly.
+    best_for:
+      - api-backends
+      - ml-ai-services
+      - microservices
+      - startups
+    learning_curve: low
+    developer_velocity: high
+    performance_profile: high
+    ecosystem_maturity: high
+    ops_complexity: low
+
+  - id: django
+    name: Django
+    language: python
+    description: Full-featured Python web framework with batteries included.
+    best_for:
+      - full-stack-backends
+      - admin-heavy-apps
+      - rapid-development
+    learning_curve: medium
+    developer_velocity: high
+    performance_profile: medium
+    ecosystem_maturity: high
+    ops_complexity: medium
+
+  - id: express
+    name: Express.js
+    language: javascript
+    description: Minimal Node.js framework for building APIs and web apps.
+    best_for:
+      - lightweight-backends
+      - rapid-mvp
+    learning_curve: low
+    developer_velocity: high
+    performance_profile: medium
+    ecosystem_maturity: high
+    ops_complexity: low
+
+  - id: nestjs
+    name: NestJS
+    language: typescript
+    description: Structured and scalable Node.js framework with strong typing.
+    best_for:
+      - scalable-backends
+      - enterprise-node
+    learning_curve: medium
+    developer_velocity: medium
+    performance_profile: medium
+    ecosystem_maturity: high
+    ops_complexity: medium
+
+  - id: spring-boot
+    name: Spring Boot
+    language: java
+    description: Enterprise-grade backend framework for large-scale applications.
+    best_for:
+      - enterprise-backends
+      - high-scale-systems
+    learning_curve: high
+    developer_velocity: medium
+    performance_profile: high
+    ecosystem_maturity: high
+    ops_complexity: high
+
+  - id: gin
+    name: Gin
+    language: go
+    description: Lightweight and fast Go web framework.
+    best_for:
+      - high-performance-services
+      - microservices
+    learning_curve: medium
+    developer_velocity: medium
+    performance_profile: high
+    ecosystem_maturity: medium
+    ops_complexity: medium

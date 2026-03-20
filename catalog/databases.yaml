@@ -1,0 +1,57 @@
+databases:
+  - id: postgresql
+    name: PostgreSQL
+    type: relational
+    description: Powerful open-source relational database.
+    best_for:
+      - general-purpose
+      - scalable-backends
+      - structured-data
+    ops_complexity: medium
+    scalability: high
+    cost_efficiency: high
+
+  - id: mysql
+    name: MySQL
+    type: relational
+    description: Popular relational database with wide hosting support.
+    best_for:
+      - web-apps
+      - simple-backends
+    ops_complexity: low
+    scalability: medium
+    cost_efficiency: high
+
+  - id: mongodb
+    name: MongoDB
+    type: document
+    description: Flexible NoSQL document database.
+    best_for:
+      - rapid-development
+      - flexible-schema
+    ops_complexity: low
+    scalability: high
+    cost_efficiency: medium
+
+  - id: redis
+    name: Redis
+    type: in-memory
+    description: High-speed in-memory store used for caching and queues.
+    best_for:
+      - caching
+      - sessions
+      - real-time-features
+    ops_complexity: low
+    scalability: medium
+    cost_efficiency: medium
+
+  - id: sqlite
+    name: SQLite
+    type: embedded
+    description: Lightweight database for small applications.
+    best_for:
+      - prototypes
+      - local-development
+    ops_complexity: very-low
+    scalability: low
+    cost_efficiency: very-high
