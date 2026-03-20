@@ -6,6 +6,7 @@ import streamlit as st
 API_BASE_URL = "http://127.0.0.1:8000"
 RECOMMEND_URL = f"{API_BASE_URL}/recommend"
 HEALTH_URL = f"{API_BASE_URL}/health"
+SCENARIOS_URL = f"{API_BASE_URL}/scenarios"
 
 st.set_page_config(page_title="StackWise-AI", layout="wide")
 
@@ -20,6 +21,16 @@ def check_backend_health() -> bool:
         return False
 
 
+def load_scenarios() -> list[dict]:
+    try:
+        response = requests.get(SCENARIOS_URL, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        return data if isinstance(data, list) else []
+    except requests.RequestException:
+        return []
+
+
 st.title("🚀 StackWise-AI")
 st.subheader("AI-Powered Tech Stack Recommendation System")
 
@@ -32,6 +43,8 @@ else:
 
 
 st.sidebar.header("Project Inputs")
+
+scenario_name = st.sidebar.text_input("Scenario Name (optional)")
 
 project_type = st.sidebar.selectbox(
     "Project Type",
@@ -73,7 +86,16 @@ if st.sidebar.button("Get Recommendation"):
         st.stop()
 
     try:
-        response = requests.post(RECOMMEND_URL, json=payload, timeout=10)
+        query_params = {}
+        if scenario_name.strip():
+            query_params["scenario_name"] = scenario_name.strip()
+
+        response = requests.post(
+            RECOMMEND_URL,
+            params=query_params,
+            json=payload,
+            timeout=10,
+        )
         response.raise_for_status()
         data = response.json()
 
@@ -91,7 +113,12 @@ if st.sidebar.button("Get Recommendation"):
                 st.write(f"**Deployment:** {winner['deployment']}")
 
             with col2:
-                st.info("Primary recommendation generated from project fit, team fit, ops fit, and ecosystem evidence.")
+                st.info(
+                    "Primary recommendation generated from project fit, "
+                    "team fit, ops fit, and ecosystem evidence."
+                )
+        else:
+            st.warning("No recommendation could be generated.")
 
         st.header("🔄 Alternatives")
         alternatives = data.get("alternatives", [])
@@ -135,3 +162,23 @@ if st.sidebar.button("Get Recommendation"):
         st.error(f"Backend returned an error: {detail}")
     except Exception as exc:
         st.error(f"Unexpected error: {exc}")
+
+
+st.header("📁 Saved Scenarios")
+
+if backend_ok:
+    scenarios = load_scenarios()
+
+    if scenarios:
+        for sc in scenarios:
+            scenario_label = sc["scenario_name"] if sc["scenario_name"] else "(no name)"
+            st.write(
+                f"**ID:** {sc['id']} | "
+                f"**Scenario:** {scenario_label} | "
+                f"**Project Type:** {sc['project_type']} | "
+                f"**Created At:** {sc['created_at']}"
+            )
+    else:
+        st.write("No saved scenarios found yet.")
+else:
+    st.write("Scenarios are unavailable because the backend is offline.")
