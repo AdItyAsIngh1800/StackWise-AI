@@ -1,240 +1,54 @@
 languages:
   - id: python
     name: Python
-    category: language
-    description: High-productivity language with a strong backend, data, and AI ecosystem.
-    best_for:
-      - ai-ml-projects
-      - backend-apis
-      - rapid-prototyping
-      - data-intensive-apps
-      - startups
-    not_ideal_for:
-      - ultra-low-latency-systems
-      - memory-constrained-systems
+    best_for: [api, ai-ml, data, rapid-development]
     learning_curve: low
-    developer_velocity: high
-    performance_profile: medium
-    ecosystem_maturity: high
-    hiring_availability: high
+    performance: medium
+    ecosystem: very-high
+    hiring: very-high
     ops_complexity: low
-    cost_efficiency: high
-    compatibility_tags:
-      - fastapi
-      - django
-      - flask
-      - postgresql
-      - redis
-      - docker
-      - render
-      - railway
 
   - id: javascript
     name: JavaScript
-    category: language
-    description: Universal web language with strong frontend and backend adoption.
-    best_for:
-      - web-applications
-      - full-stack-development
-      - rapid-mvp-builds
-      - frontend-heavy-products
-    not_ideal_for:
-      - compute-heavy-systems
-      - strict-type-safety-without-tooling
+    best_for: [web, fullstack, frontend-heavy]
     learning_curve: low
-    developer_velocity: high
-    performance_profile: medium
-    ecosystem_maturity: high
-    hiring_availability: high
+    performance: medium
+    ecosystem: very-high
+    hiring: very-high
     ops_complexity: low
-    cost_efficiency: high
-    compatibility_tags:
-      - express
-      - react
-      - nextjs
-      - mongodb
-      - postgresql
-      - vercel
-      - render
 
   - id: typescript
     name: TypeScript
-    category: language
-    description: Type-safe superset of JavaScript, ideal for maintainable modern web systems.
-    best_for:
-      - scalable-web-apps
-      - full-stack-products
-      - team-development
-      - maintainable-codebases
-    not_ideal_for:
-      - very-small-throwaway-scripts
+    best_for: [scalable-web, enterprise-web]
     learning_curve: medium
-    developer_velocity: high
-    performance_profile: medium
-    ecosystem_maturity: high
-    hiring_availability: high
+    performance: medium
+    ecosystem: very-high
+    hiring: high
     ops_complexity: low
-    cost_efficiency: high
-    compatibility_tags:
-      - nestjs
-      - nextjs
-      - react
-      - postgresql
-      - vercel
-      - render
-      - docker
 
   - id: java
     name: Java
-    category: language
-    description: Mature enterprise language with strong backend and large-scale system support.
-    best_for:
-      - enterprise-backends
-      - high-scale-systems
-      - long-lived-platforms
-      - strongly-typed-large-teams
-    not_ideal_for:
-      - very-fast-mvp-iteration
-      - solo-developer-rapid-builds
+    best_for: [enterprise, high-scale]
     learning_curve: medium
-    developer_velocity: medium
-    performance_profile: high
-    ecosystem_maturity: high
-    hiring_availability: high
+    performance: high
+    ecosystem: very-high
+    hiring: high
     ops_complexity: medium
-    cost_efficiency: medium
-    compatibility_tags:
-      - spring-boot
-      - postgresql
-      - mysql
-      - docker
-      - kubernetes
-      - ecs
 
   - id: go
     name: Go
-    category: language
-    description: Fast, simple language well-suited for cloud-native services and infrastructure tooling.
-    best_for:
-      - cloud-native-backends
-      - microservices
-      - infrastructure-tools
-      - network-services
-    not_ideal_for:
-      - ui-heavy-products
-      - very-beginner-teams
+    best_for: [microservices, cloud, performance]
     learning_curve: medium
-    developer_velocity: medium
-    performance_profile: high
-    ecosystem_maturity: high
-    hiring_availability: medium
+    performance: high
+    ecosystem: high
+    hiring: medium
     ops_complexity: medium
-    cost_efficiency: high
-    compatibility_tags:
-      - gin
-      - fiber
-      - postgresql
-      - redis
-      - docker
-      - kubernetes
-      - fly-io
-
-  - id: csharp
-    name: C#
-    category: language
-    description: Strong enterprise language with excellent tooling and Microsoft ecosystem support.
-    best_for:
-      - enterprise-applications
-      - internal-tools
-      - microsoft-stack-products
-      - scalable-backends
-    not_ideal_for:
-      - ultra-lightweight-prototypes
-    learning_curve: medium
-    developer_velocity: medium
-    performance_profile: high
-    ecosystem_maturity: high
-    hiring_availability: medium
-    ops_complexity: medium
-    cost_efficiency: medium
-    compatibility_tags:
-      - aspnet-core
-      - sql-server
-      - postgresql
-      - azure-app-service
-      - docker
-
-  - id: php
-    name: PHP
-    category: language
-    description: Widely deployed backend language with strong web and CMS ecosystem support.
-    best_for:
-      - traditional-web-apps
-      - cms-driven-sites
-      - low-cost-hosting
-      - fast-web-backends
-    not_ideal_for:
-      - modern-real-time-distributed-systems
-    learning_curve: low
-    developer_velocity: medium
-    performance_profile: medium
-    ecosystem_maturity: high
-    hiring_availability: medium
-    ops_complexity: low
-    cost_efficiency: high
-    compatibility_tags:
-      - laravel
-      - mysql
-      - postgresql
-      - shared-hosting
-      - docker
-
-  - id: ruby
-    name: Ruby
-    category: language
-    description: Developer-friendly language known for fast product development and mature web tooling.
-    best_for:
-      - startup-mvps
-      - developer-productivity
-      - conventional-web-apps
-    not_ideal_for:
-      - very-high-throughput-systems
-    learning_curve: low
-    developer_velocity: high
-    performance_profile: medium
-    ecosystem_maturity: medium
-    hiring_availability: medium
-    ops_complexity: low
-    cost_efficiency: medium
-    compatibility_tags:
-      - rails
-      - postgresql
-      - redis
-      - render
-      - fly-io
 
   - id: rust
     name: Rust
-    category: language
-    description: High-performance systems language with strong safety guarantees.
-    best_for:
-      - performance-critical-services
-      - secure-systems
-      - low-level-platforms
-    not_ideal_for:
-      - fastest-mvp-delivery
-      - teams-new-to-systems-programming
+    best_for: [high-performance, systems]
     learning_curve: high
-    developer_velocity: low
-    performance_profile: very-high
-    ecosystem_maturity: medium
-    hiring_availability: low
+    performance: very-high
+    ecosystem: medium
+    hiring: low
     ops_complexity: medium
-    cost_efficiency: medium
-    compatibility_tags:
-      - actix-web
-      - axum
-      - postgresql
-      - docker
-      - fly-io
-      - kubernetes
