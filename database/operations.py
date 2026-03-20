@@ -1,0 +1,62 @@
+from __future__ import annotations
+
+import json
+from typing import Any
+
+from database.connection import get_db_connection
+
+
+def log_recommendation(request_data: dict[str, Any], result_data: dict[str, Any]) -> None:
+    winner = result_data.get("winner") or {}
+
+    query = """
+    INSERT INTO recommendation_logs (
+        project_type,
+        team_languages,
+        low_ops,
+        expected_scale,
+        prefer_enterprise,
+        prototype_only,
+        rapid_schema_changes,
+        needs_cache,
+        prefer_portability,
+        winner_language,
+        winner_framework,
+        winner_database,
+        winner_deployment,
+        winner_score,
+        recommendation_payload,
+        explanation
+    )
+    VALUES (
+        %s, %s, %s, %s, %s, %s, %s, %s, %s,
+        %s, %s, %s, %s, %s, %s, %s
+    );
+    """
+
+    values = (
+        request_data.get("project_type"),
+        json.dumps(request_data.get("team_languages", [])),
+        request_data.get("low_ops", False),
+        request_data.get("expected_scale", "medium"),
+        request_data.get("prefer_enterprise", False),
+        request_data.get("prototype_only", False),
+        request_data.get("rapid_schema_changes", False),
+        request_data.get("needs_cache", False),
+        request_data.get("prefer_portability", False),
+        winner.get("language"),
+        winner.get("backend_framework"),
+        winner.get("database"),
+        winner.get("deployment"),
+        winner.get("score"),
+        json.dumps(result_data),
+        result_data.get("explanation"),
+    )
+
+    conn = get_db_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(query, values)
+    finally:
+        conn.close()

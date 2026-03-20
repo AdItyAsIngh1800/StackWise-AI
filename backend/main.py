@@ -6,6 +6,7 @@ from backend.schemas import (
     RecommendationRequest,
     RecommendationResponse,
 )
+from database.operations import log_recommendation
 from engine.recommend import recommend_stack
 
 
@@ -15,7 +16,6 @@ app = FastAPI(
     description="AI-powered tech stack recommendation service",
     contact={
         "name": "Aditya Singh",
-        "email": "aditya.si181@gmail.com",
     },
 )
 
@@ -35,20 +35,12 @@ def root():
             "database recommendation",
             "deployment recommendation",
         ],
-        "core_modules": [
-            "catalog",
-            "evidence",
-            "engine",
-            "backend",
-            "frontend",
-        ],
         "available_routes": {
             "root": "/",
             "health": "/health",
             "recommend": "/recommend",
             "docs": "/docs",
         },
-        
     }
 
 
@@ -59,5 +51,13 @@ def health():
 
 @app.post("/recommend", tags=["Recommendation"], response_model=RecommendationResponse)
 def recommend(request: RecommendationRequest):
-    result = recommend_stack(request.model_dump())
+    request_data = request.model_dump()
+    result = recommend_stack(request_data)
+
+    try:
+        log_recommendation(request_data, result)
+    except Exception as exc:
+        # logging failure should not break recommendation response
+        print(f"Database logging failed: {exc}")
+
     return result
