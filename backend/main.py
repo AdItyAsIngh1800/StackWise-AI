@@ -13,10 +13,14 @@ app = FastAPI(
     title="StackWise-AI API",
     version="1.0.0",
     description="AI-powered tech stack recommendation service",
+    contact={
+        "name": "Aditya Singh",
+        "email": "aditya.si181@gmail.com",
+    },
 )
 
 
-@app.get("/")
+@app.get("/", tags=["Meta"])
 def root():
     return {
         "project": "StackWise-AI",
@@ -44,15 +48,16 @@ def root():
             "recommend": "/recommend",
             "docs": "/docs",
         },
+        
     }
 
 
-@app.get("/health")
+@app.get("/health", tags=["Meta"])
 def health():
     return {"status": "ok"}
 
 
-@app.post("/recommend", response_model=RecommendationResponse)
+@app.post("/recommend", tags=["Recommendation"], response_model=RecommendationResponse)
 def recommend(request: RecommendationRequest):
     result = recommend_stack(request.model_dump())
     return result
