@@ -32,3 +32,4 @@ class RecommendationResponse(BaseModel):
     explanation: Optional[str]
     confidence: float | None = None
     sensitivity: dict[str, Any] | None = None
+    pareto: List[dict[str, Any]] | None = None
