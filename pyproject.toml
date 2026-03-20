@@ -1,28 +1,20 @@
 [project]
-name = "referee-tool"
-version = "0.2.0"
-description = "Explainable decision-analysis platform for infrastructure recommendations"
-requires-python = ">=3.11"
+name = "stackwise-ai"
+version = "0.1.0"
+description = "AI-powered tech stack recommendation system"
+authors = [
+    { name = "Aditya Singh" }
+]
+requires-python = ">=3.10"
 
 dependencies = [
-    "duckdb",
-    "polars",
-    "pyarrow",
-    "pandas",
-    "datasets",
     "fastapi",
     "uvicorn",
-    "pydantic",
     "streamlit",
-    "plotly",
-    "pytest",
-    "pytest-cov",
-    "ruff",
-    "mypy"
+    "pandas",
+    "pyyaml",
+    "pytest"
 ]
 
-[tool.ruff]
-line-length = 88
-
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+pythonpath = ["."]
