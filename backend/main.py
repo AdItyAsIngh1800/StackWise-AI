@@ -16,6 +16,37 @@ app = FastAPI(
 )
 
 
+@app.get("/")
+def root():
+    return {
+        "project": "StackWise-AI",
+        "version": "1.0.0",
+        "description": (
+            "StackWise-AI is a data-driven recommendation platform that helps "
+            "developers choose a suitable tech stack for a new project."
+        ),
+        "v1_scope": [
+            "language recommendation",
+            "backend framework recommendation",
+            "database recommendation",
+            "deployment recommendation",
+        ],
+        "core_modules": [
+            "catalog",
+            "evidence",
+            "engine",
+            "backend",
+            "frontend",
+        ],
+        "available_routes": {
+            "root": "/",
+            "health": "/health",
+            "recommend": "/recommend",
+            "docs": "/docs",
+        },
+    }
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
