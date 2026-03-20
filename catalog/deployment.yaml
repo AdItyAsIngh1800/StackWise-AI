@@ -1,0 +1,24 @@
+deployment:
+  - id: render
+    best_for: [fullstack, low-ops]
+    complexity: low
+
+  - id: railway
+    best_for: [rapid-prototyping]
+    complexity: low
+
+  - id: vercel
+    best_for: [frontend, serverless]
+    complexity: very-low
+
+  - id: docker-vm
+    best_for: [portable, flexible]
+    complexity: medium
+
+  - id: ecs
+    best_for: [aws, scalable]
+    complexity: medium
+
+  - id: kubernetes
+    best_for: [large-scale, distributed]
+    complexity: high
