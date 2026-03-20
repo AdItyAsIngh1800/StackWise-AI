@@ -21,3 +21,7 @@ CREATE TABLE IF NOT EXISTS recommendation_logs (
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE recommendation_logs
+ADD COLUMN IF NOT EXISTS scenario_name VARCHAR(255);
+
