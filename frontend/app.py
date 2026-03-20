@@ -142,6 +142,19 @@ if st.sidebar.button("Get Recommendation"):
         else:
             st.write("No sensitivity analysis available.")
 
+        st.header("⚖️ Pareto Optimal Options")
+        pareto = data.get("pareto", [])
+
+        if pareto:
+            for item in pareto:
+                st.write(
+                    f"- **{item['language']}** | "
+                    f"Score: {round(item['score'], 3)} | "
+                    f"Ecosystem: {round(item['ecosystem'], 3)}"
+                )
+        else:
+            st.write("No Pareto optimal options found.")
+
         st.header("🔄 Alternatives")
         alternatives = data.get("alternatives", [])
 
