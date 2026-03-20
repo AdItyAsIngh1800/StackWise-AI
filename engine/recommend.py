@@ -3,8 +3,10 @@ from __future__ import annotations
 from typing import Any
 
 from engine.confidence import compute_confidence
+from engine.pareto import compute_pareto_frontier
 from engine.scoring import rank_languages
 from engine.sensitivity import run_sensitivity_analysis
+from evidence.language_signals import get_language_signal
 from evidence.mappings import (
     LANGUAGE_TO_BACKEND_FRAMEWORKS,
     LANGUAGE_TO_DATABASES,
@@ -122,6 +124,19 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
             f"{winner['deployment']}."
         )
 
+    pareto_input = []
+    for item in ranked:
+        signals = get_language_signal(item["language"])
+        pareto_input.append(
+            {
+                "language": item["language"],
+                "score": item["score"],
+                "ecosystem": signals["ecosystem"],
+            }
+        )
+
+    pareto = compute_pareto_frontier(pareto_input)
+
     return {
         "winner": winner,
         "alternatives": recommendations[1:],
@@ -129,6 +144,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
         "explanation": explanation,
         "confidence": confidence,
         "sensitivity": sensitivity,
+        "pareto": pareto,
     }
 
 
