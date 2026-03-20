@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from engine.confidence import compute_confidence
 from engine.scoring import rank_languages
 from evidence.mappings import (
     LANGUAGE_TO_BACKEND_FRAMEWORKS,
@@ -84,6 +85,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
     ]
 
     ranked = rank_languages(candidates, context)
+    confidence = compute_confidence(ranked, context)
     top = ranked[:3]
 
     recommendations: list[dict[str, Any]] = []
@@ -116,6 +118,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
         "alternatives": recommendations[1:],
         "ranked_languages": ranked,
         "explanation": explanation,
+        "confidence": confidence,
     }
 
 
