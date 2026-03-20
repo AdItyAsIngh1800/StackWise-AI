@@ -6,11 +6,16 @@ from typing import Any
 from database.connection import get_db_connection
 
 
-def log_recommendation(request_data: dict[str, Any], result_data: dict[str, Any]) -> None:
+def log_recommendation(
+    request_data: dict[str, Any],
+    result_data: dict[str, Any],
+    scenario_name: str | None = None,
+) -> None:
     winner = result_data.get("winner") or {}
 
     query = """
     INSERT INTO recommendation_logs (
+        scenario_name,
         project_type,
         team_languages,
         low_ops,
@@ -29,12 +34,13 @@ def log_recommendation(request_data: dict[str, Any], result_data: dict[str, Any]
         explanation
     )
     VALUES (
-        %s, %s, %s, %s, %s, %s, %s, %s, %s,
+        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
         %s, %s, %s, %s, %s, %s, %s
     );
     """
 
     values = (
+        scenario_name,
         request_data.get("project_type"),
         json.dumps(request_data.get("team_languages", [])),
         request_data.get("low_ops", False),
@@ -58,5 +64,51 @@ def log_recommendation(request_data: dict[str, Any], result_data: dict[str, Any]
         with conn:
             with conn.cursor() as cur:
                 cur.execute(query, values)
+    finally:
+        conn.close()
+
+def get_scenarios():
+    query = """
+    SELECT id, scenario_name, project_type, created_at
+    FROM recommendation_logs
+    ORDER BY created_at DESC
+    LIMIT 20;
+    """
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            return [
+                {
+                    "id": r[0],
+                    "scenario_name": r[1],
+                    "project_type": r[2],
+                    "created_at": str(r[3]),
+                }
+                for r in rows
+            ]
+    finally:
+        conn.close()
+
+def get_scenario_by_id(scenario_id: int):
+    query = """
+    SELECT recommendation_payload
+    FROM recommendation_logs
+    WHERE id = %s;
+    """
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(query, (scenario_id,))
+            row = cur.fetchone()
+
+            if not row:
+                return None
+
+            return row[0]
     finally:
         conn.close()
