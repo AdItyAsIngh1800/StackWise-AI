@@ -557,6 +557,12 @@ Aditya Singh
 
 ----------
 
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
 ## **⭐ If you found this useful**
 
   
