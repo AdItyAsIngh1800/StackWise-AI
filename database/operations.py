@@ -67,7 +67,8 @@ def log_recommendation(
     finally:
         conn.close()
 
-def get_scenarios():
+
+def get_scenarios() -> list[dict[str, Any]]:
     query = """
     SELECT id, scenario_name, project_type, created_at
     FROM recommendation_logs
@@ -81,19 +82,34 @@ def get_scenarios():
             cur.execute(query)
             rows = cur.fetchall()
 
-            return [
-                {
-                    "id": r[0],
-                    "scenario_name": r[1],
-                    "project_type": r[2],
-                    "created_at": str(r[3]),
-                }
-                for r in rows
-            ]
+            scenarios: list[dict[str, Any]] = []
+
+            for row in rows:
+                if isinstance(row, dict):
+                    scenarios.append(
+                        {
+                            "id": row.get("id"),
+                            "scenario_name": row.get("scenario_name"),
+                            "project_type": row.get("project_type"),
+                            "created_at": str(row.get("created_at")),
+                        }
+                    )
+                else:
+                    scenarios.append(
+                        {
+                            "id": row[0],
+                            "scenario_name": row[1],
+                            "project_type": row[2],
+                            "created_at": str(row[3]),
+                        }
+                    )
+
+            return scenarios
     finally:
         conn.close()
 
-def get_scenario_by_id(scenario_id: int):
+
+def get_scenario_by_id(scenario_id: int) -> dict[str, Any] | None:
     query = """
     SELECT recommendation_payload
     FROM recommendation_logs
@@ -108,6 +124,9 @@ def get_scenario_by_id(scenario_id: int):
 
             if not row:
                 return None
+
+            if isinstance(row, dict):
+                return row.get("recommendation_payload")
 
             return row[0]
     finally:

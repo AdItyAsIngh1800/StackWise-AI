@@ -1,69 +1,39 @@
-# Core
-numpy
-pandas
-pyarrow
-
-# Visualization / UI
-streamlit
-altair
-pydeck
-pillow
-
-# API / Requests
-requests
-urllib3
-certifi
-charset-normalizer
-idna
-
-# Git / Versioning
-GitPython
-gitdb
-smmap
-
-# Config / Parsing
-toml
-packaging
-
-# JSON / Schema
-jsonschema
-jsonschema-specifications
-referencing
-rpds-py
-
-# Python utilities
-click
-typing_extensions
-python-dateutil
-pytz
-tzdata
-six
-
-# Templates
-Jinja2
-MarkupSafe
-
-# Streamlit dependencies
-blinker
-cachetools
-protobuf
-tenacity
-tornado
-watchdog
-narwhals
-plotly
-
-# Testing (optional - remove in production if not needed)
-pytest
-pluggy
-iniconfig
-
-# Misc
-attrs
-Pygments
-
-# 🔥 Recommended for your project architecture
-duckdb
-polars
+# -------------------------------
+# Backend (FastAPI)
+# -------------------------------
 fastapi
 uvicorn
+
+# -------------------------------
+# Frontend (Streamlit)
+# -------------------------------
+streamlit
+requests
+
+# -------------------------------
+# Data Processing & Pipelines
+# -------------------------------
+polars
+pandas
+pyarrow
+duckdb
+
+# -------------------------------
+# Database (PostgreSQL)
+# -------------------------------
+psycopg2-binary
+
+# -------------------------------
+# Validation & Config
+# -------------------------------
+pydantic
+
+# -------------------------------
+# Testing
+# -------------------------------
+pytest
+
+# -------------------------------
+# Optional Utilities (recommended)
+# -------------------------------
+python-dotenv
