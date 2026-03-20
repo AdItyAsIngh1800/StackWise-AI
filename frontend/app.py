@@ -120,6 +120,10 @@ if st.sidebar.button("Get Recommendation"):
         else:
             st.warning("No recommendation could be generated.")
 
+        st.header("📈 Confidence Score")
+        confidence = data.get("confidence", 0.0)
+        st.metric("Confidence", confidence)
+
         st.header("🔄 Alternatives")
         alternatives = data.get("alternatives", [])
 
