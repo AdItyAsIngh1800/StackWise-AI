@@ -1,34 +1,66 @@
-# Python
+# =========================
+# ENV / SECRETS
+# =========================
+.env
+.env.*
+*.env
+
+# =========================
+# PYTHON
+# =========================
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.sqlite3
 
-# Virtual environment
+# =========================
+# VIRTUAL ENV
+# =========================
 venv/
 .env/
+ENV/
+env/
 
-# macOS
-.DS_Store
-
-# IDE
+# =========================
+# IDE / EDITOR
+# =========================
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Data files
-data/raw/
-data/processed/
-
-# Logs
+# =========================
+# LOGS
+# =========================
 *.log
 
-# Build
+# =========================
+# OS FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# DATA FILES (optional)
+# =========================
+data/
+*.csv
+*.parquet
+
+# =========================
+# BUILD / CACHE
+# =========================
+.cache/
 dist/
 build/
-*.egg-info/
 
-# Cache
-.pytest_cache/
+# =========================
+# STREAMLIT
+# =========================
+.streamlit/
 
-# Misc
-*.sqlite3
+# =========================
+# DOCKER
+# =========================
+*.env.docker

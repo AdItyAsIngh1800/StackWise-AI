@@ -1,17 +1,10 @@
-from __future__ import annotations
-
 import os
-from typing import Any
+from dotenv import load_dotenv
 
-import psycopg2
-from psycopg2.extensions import connection
+load_dotenv()
 
-
-def get_db_connection() -> connection:
-    return psycopg2.connect(
-        host=os.getenv("PGHOST", "localhost"),
-        port=os.getenv("PGPORT", "5432"),
-        dbname=os.getenv("PGDATABASE", "stackwise_ai"),
-        user=os.getenv("PGUSER", "postgres"),
-        password=os.getenv("PGPASSWORD", "naina2628"),
-    )
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
