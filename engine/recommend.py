@@ -4,6 +4,7 @@ from typing import Any
 
 from engine.confidence import compute_confidence
 from engine.scoring import rank_languages
+from engine.sensitivity import run_sensitivity_analysis
 from evidence.mappings import (
     LANGUAGE_TO_BACKEND_FRAMEWORKS,
     LANGUAGE_TO_DATABASES,
@@ -17,19 +18,21 @@ def _pick_framework(language: str, context: dict[str, Any]) -> str | None:
         return None
 
     if language == "python":
-        return "fastapi"
+        if context.get("prefer_enterprise"):
+            return "django" if "django" in options else options[0]
+        return "fastapi" if "fastapi" in options else options[0]
 
     if language == "typescript":
-        return "nestjs"
+        return "nestjs" if "nestjs" in options else options[0]
 
     if language == "javascript":
-        return "express"
+        return "express" if "express" in options else options[0]
 
     if language == "java":
-        return "spring-boot"
+        return "spring-boot" if "spring-boot" in options else options[0]
 
     if language == "go":
-        return "gin"
+        return "gin" if "gin" in options else options[0]
 
     return options[0]
 
@@ -57,6 +60,8 @@ def _pick_deployment(language: str, context: dict[str, Any]) -> str | None:
         return None
 
     if context.get("low_ops"):
+        if language in {"javascript", "typescript"} and "vercel" in options:
+            return "vercel"
         if "render" in options:
             return "render"
         if "railway" in options:
@@ -86,8 +91,9 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
 
     ranked = rank_languages(candidates, context)
     confidence = compute_confidence(ranked, context)
-    top = ranked[:3]
+    sensitivity = run_sensitivity_analysis(context, candidates)
 
+    top = ranked[:3]
     recommendations: list[dict[str, Any]] = []
 
     for item in top:
@@ -110,7 +116,10 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
         explanation = (
             f"{winner['language']} is recommended due to strong alignment with "
             f"project requirements, team familiarity, operational preference, "
-            f"and ecosystem strength."
+            f"and ecosystem strength. The recommended backend framework is "
+            f"{winner['backend_framework']}, the suggested database is "
+            f"{winner['database']}, and the preferred deployment option is "
+            f"{winner['deployment']}."
         )
 
     return {
@@ -119,6 +128,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
         "ranked_languages": ranked,
         "explanation": explanation,
         "confidence": confidence,
+        "sensitivity": sensitivity,
     }
 
 
@@ -128,6 +138,7 @@ if __name__ == "__main__":
         "team_languages": ["python"],
         "low_ops": True,
         "expected_scale": "medium",
+        "prefer_enterprise": False,
         "prototype_only": False,
         "rapid_schema_changes": False,
         "needs_cache": False,
