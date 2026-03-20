@@ -1,259 +1,105 @@
 from __future__ import annotations
 
-import math
-from functools import lru_cache
-from pathlib import Path
-from typing import Any
-
 import pandas as pd
 
+from evidence.loader import (
+    load_language_benchmarks,
+    load_language_distribution,
+)
+from evidence.mappings import normalize_language
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-PROCESSED_DIR = BASE_DIR / "data" / "processed"
+def _normalize_series(series: pd.Series) -> pd.Series:
+    if series.max() == series.min():
+        return pd.Series([0.5] * len(series), index=series.index)
 
-LANGUAGE_BENCHMARKS_PATH = PROCESSED_DIR / "language_benchmarks.csv"
-LANGUAGE_DISTRIBUTION_PATH = PROCESSED_DIR / "language_distribution.csv"
-
-
-LANGUAGE_ALIASES = {
-    "js": "javascript",
-    "javascript": "javascript",
-    "node": "javascript",
-    "nodejs": "javascript",
-    "ts": "typescript",
-    "typescript": "typescript",
-    "py": "python",
-    "python": "python",
-    "golang": "go",
-    "go": "go",
-    "csharp": "c#",
-    "c#": "c#",
-    "cpp": "c++",
-    "c++": "c++",
-    "rb": "ruby",
-    "ruby": "ruby",
-    "postgres": "postgresql",
-    "postgresql": "postgresql",
-}
+    return (series - series.min()) / (series.max() - series.min())
 
 
-TOP_LANGUAGE_ALLOWLIST = {
-    "javascript",
-    "typescript",
-    "python",
-    "java",
-    "go",
-    "c#",
-    "c++",
-    "php",
-    "ruby",
-    "rust",
-    "kotlin",
-    "swift",
-    "scala",
-    "r",
-    "dart",
-    "elixir",
-    "clojure",
-    "haskell",
-    "lua",
-    "shell",
-    "sql",
-    "html",
-    "css",
-}
+def build_language_signals() -> pd.DataFrame:
+    dist = load_language_distribution()
+    bench = load_language_benchmarks()
 
+    # Normalize language names
+    dist["language"] = dist["language"].apply(normalize_language)
+    bench["language"] = bench["language"].apply(normalize_language)
 
-def _safe_read_csv(path: Path) -> pd.DataFrame:
-    if not path.exists():
-        raise FileNotFoundError(f"Missing file: {path}")
-    return pd.read_csv(path)
+    dist = dist.dropna(subset=["language"])
+    bench = bench.dropna(subset=["language"])
 
+    # Aggregate distribution (popularity)
+    dist_agg = (
+        dist.groupby("language")
+        .agg({"count": "sum"})
+        .rename(columns={"count": "popularity_raw"})
+        .reset_index()
+    )
 
-def normalize_language_name(value: Any) -> str | None:
-    if value is None:
-        return None
+    # Aggregate benchmarks
+    bench_agg = (
+        bench.groupby("language")
+        .agg({
+            "stars": "mean",
+            "forks": "mean",
+            "issues": "mean",
+        })
+        .rename(columns={
+            "stars": "maturity_raw",
+            "forks": "activity_raw",
+            "issues": "issues_raw",
+        })
+        .reset_index()
+    )
 
-    text = str(value).strip()
-    if not text or text.lower() == "nan":
-        return None
+    # Merge
+    df = pd.merge(dist_agg, bench_agg, on="language", how="outer").fillna(0)
 
-    key = text.lower()
-    if key in LANGUAGE_ALIASES:
-        return LANGUAGE_ALIASES[key]
+    # Normalize signals
+    df["popularity"] = _normalize_series(df["popularity_raw"])
+    df["maturity"] = _normalize_series(df["maturity_raw"])
+    df["activity"] = _normalize_series(df["activity_raw"])
 
-    return key
-
-
-def _min_max_scale(series: pd.Series) -> pd.Series:
-    series = series.fillna(0.0).astype(float)
-    min_val = series.min()
-    max_val = series.max()
-
-    if pd.isna(min_val) or pd.isna(max_val) or max_val == min_val:
-        return pd.Series([0.0] * len(series), index=series.index)
-
-    return (series - min_val) / (max_val - min_val)
-
-
-def _log1p_scale(series: pd.Series) -> pd.Series:
-    series = series.fillna(0.0).astype(float)
-    transformed = series.map(lambda x: math.log1p(x))
-    return _min_max_scale(transformed)
-
-
-def _clean_distribution(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df["language_norm"] = df["language"].apply(normalize_language_name)
-    df = df[df["language_norm"].notna()]
-
-    df = (
-        df.groupby("language_norm", as_index=False)
-        .agg(
-            repo_count=("repo_count", "sum"),
-            avg_forks=("avg_forks", "mean"),
-            avg_watchers=("avg_watchers", "mean"),
-        )
+    # Composite ecosystem score
+    df["ecosystem"] = (
+        0.4 * df["popularity"]
+        + 0.3 * df["maturity"]
+        + 0.3 * df["activity"]
     )
 
     return df
 
 
-def _clean_benchmarks(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df["language_norm"] = df["language"].apply(normalize_language_name)
-    df = df[df["language_norm"].notna()]
-
-    df = (
-        df.groupby("language_norm", as_index=False)
-        .agg(
-            benchmark_repo_count=("repo_count", "sum"),
-            benchmark_avg_forks=("avg_forks", "mean"),
-            benchmark_avg_watchers=("avg_watchers", "mean"),
-            benchmark_avg_size=("avg_size", "mean"),
-            ecosystem_strength_score=("ecosystem_strength_score", "mean"),
-        )
-    )
-
-    return df
+# Cache signals in memory (simple optimization)
+_LANGUAGE_SIGNALS_CACHE: pd.DataFrame | None = None
 
 
-@lru_cache(maxsize=1)
-def build_language_signals() -> dict[str, dict[str, float]]:
-    distribution_df = _safe_read_csv(LANGUAGE_DISTRIBUTION_PATH)
-    benchmarks_df = _safe_read_csv(LANGUAGE_BENCHMARKS_PATH)
+def get_language_signals() -> pd.DataFrame:
+    global _LANGUAGE_SIGNALS_CACHE
 
-    distribution_df = _clean_distribution(distribution_df)
-    benchmarks_df = _clean_benchmarks(benchmarks_df)
+    if _LANGUAGE_SIGNALS_CACHE is None:
+        _LANGUAGE_SIGNALS_CACHE = build_language_signals()
 
-    merged = distribution_df.merge(
-        benchmarks_df,
-        on="language_norm",
-        how="outer",
-    )
+    return _LANGUAGE_SIGNALS_CACHE
 
-    merged["repo_count"] = merged["repo_count"].fillna(0.0)
-    merged["avg_forks"] = merged["avg_forks"].fillna(0.0)
-    merged["avg_watchers"] = merged["avg_watchers"].fillna(0.0)
-    merged["benchmark_repo_count"] = merged["benchmark_repo_count"].fillna(0.0)
-    merged["benchmark_avg_forks"] = merged["benchmark_avg_forks"].fillna(0.0)
-    merged["benchmark_avg_watchers"] = merged["benchmark_avg_watchers"].fillna(0.0)
-    merged["benchmark_avg_size"] = merged["benchmark_avg_size"].fillna(0.0)
-    merged["ecosystem_strength_score"] = merged["ecosystem_strength_score"].fillna(0.0)
 
-    # keep useful mainstream languages for recommendation priors
-    merged = merged[merged["language_norm"].isin(TOP_LANGUAGE_ALLOWLIST)].copy()
+def get_language_signal(language: str) -> dict:
+    df = get_language_signals()
 
-    merged["repo_count_norm"] = _log1p_scale(merged["repo_count"])
-    merged["forks_norm"] = _log1p_scale(merged["avg_forks"])
-    merged["watchers_norm"] = _log1p_scale(merged["avg_watchers"])
-    merged["size_norm"] = _log1p_scale(merged["benchmark_avg_size"])
-    merged["ecosystem_norm"] = _min_max_scale(merged["ecosystem_strength_score"])
+    row = df[df["language"] == language]
 
-    merged["popularity_score"] = (
-        0.55 * merged["repo_count_norm"] +
-        0.20 * merged["watchers_norm"] +
-        0.25 * merged["forks_norm"]
-    )
-
-    merged["maturity_score"] = (
-        0.50 * merged["ecosystem_norm"] +
-        0.25 * merged["watchers_norm"] +
-        0.25 * merged["forks_norm"]
-    )
-
-    merged["activity_score"] = (
-        0.45 * merged["forks_norm"] +
-        0.35 * merged["watchers_norm"] +
-        0.20 * merged["repo_count_norm"]
-    )
-
-    merged["ecosystem_score"] = (
-        0.50 * merged["ecosystem_norm"] +
-        0.30 * merged["repo_count_norm"] +
-        0.20 * merged["size_norm"]
-    )
-
-    merged["evidence_coverage"] = (
-        merged[
-            [
-                "repo_count",
-                "avg_forks",
-                "avg_watchers",
-                "benchmark_avg_size",
-                "ecosystem_strength_score",
-            ]
-        ]
-        .notna()
-        .sum(axis=1)
-        / 5.0
-    )
-
-    signals: dict[str, dict[str, float]] = {}
-
-    for _, row in merged.iterrows():
-        language = row["language_norm"]
-        signals[language] = {
-            "popularity": round(float(row["popularity_score"]), 4),
-            "maturity": round(float(row["maturity_score"]), 4),
-            "activity": round(float(row["activity_score"]), 4),
-            "ecosystem": round(float(row["ecosystem_score"]), 4),
-            "evidence_coverage": round(float(row["evidence_coverage"]), 4),
+    if row.empty:
+        return {
+            "popularity": 0.5,
+            "maturity": 0.5,
+            "activity": 0.5,
+            "ecosystem": 0.5,
         }
 
-    return signals
+    row = row.iloc[0]
 
-
-def get_language_signal(language: str) -> dict[str, float]:
-    normalized = normalize_language_name(language)
-    signals = build_language_signals()
-
-    default_signal = {
-        "popularity": 0.5,
-        "maturity": 0.5,
-        "activity": 0.5,
-        "ecosystem": 0.5,
-        "evidence_coverage": 0.0,
+    return {
+        "popularity": float(row["popularity"]),
+        "maturity": float(row["maturity"]),
+        "activity": float(row["activity"]),
+        "ecosystem": float(row["ecosystem"]),
     }
-
-    if normalized is None:
-        return default_signal
-
-    return signals.get(normalized, default_signal)
-
-
-if __name__ == "__main__":
-    signals = build_language_signals()
-
-    preview_languages = [
-        "python",
-        "javascript",
-        "typescript",
-        "java",
-        "go",
-        "rust",
-    ]
-
-    for language in preview_languages:
-        print(language, "->", get_language_signal(language))
