@@ -34,13 +34,12 @@ export default function LanguageSelector({ value, onChange }: Props) {
 
   return (
     <div className="relative">
-      {/* Selected Chips */}
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-xl border p-2 cursor-pointer dark:border-gray-700 dark:bg-gray-900"
+        className="flex min-h-11 cursor-pointer flex-wrap items-center gap-2 rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900"
       >
         {value.length === 0 && (
-          <span className="text-gray-400 text-sm">Select languages...</span>
+          <span className="text-sm text-gray-400">Select languages...</span>
         )}
 
         {value.map((lang) => (
@@ -62,7 +61,6 @@ export default function LanguageSelector({ value, onChange }: Props) {
         ))}
       </div>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute z-10 mt-2 w-full rounded-xl border bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
           {LANGUAGE_OPTIONS.map((lang) => {

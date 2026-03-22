@@ -49,7 +49,7 @@ export default function Results() {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <RecommendationCard winner={winner} />
-        <ConfidenceBar value={data.confidence} />
+        <ConfidenceBar value={data.confidence ?? 0} />
       </div>
 
       <RankingChart data={data.ranked_languages ?? []} />
