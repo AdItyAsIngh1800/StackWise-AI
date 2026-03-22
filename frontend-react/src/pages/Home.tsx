@@ -4,20 +4,10 @@ import { motion } from "framer-motion";
 
 import API from "../api/client";
 import type { RecommendationResponse } from "../types/api";
+
 import Card from "../components/Card";
 import LoadingSpinner from "../components/LoadingSpinner";
-
-const LANGUAGE_OPTIONS = [
-  "python",
-  "javascript",
-  "typescript",
-  "java",
-  "go",
-  "c++",
-  "rust",
-  "c#",
-  "php",
-];
+import LanguageSelector from "../components/LanguageSelector";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -30,6 +20,7 @@ export default function Home() {
 
   async function submit() {
     setLoading(true);
+
     try {
       const payload = {
         project_type: projectType,
@@ -44,6 +35,7 @@ export default function Home() {
       };
 
       const res = await API.post<RecommendationResponse>("/recommend", payload);
+
       navigate("/results", { state: res.data });
     } catch {
       alert("Failed to fetch recommendation.");
@@ -59,7 +51,8 @@ export default function Home() {
       transition={{ duration: 0.3 }}
       className="space-y-8"
     >
-      <section className="overflow-hidden rounded-3xl bg-linear-to-r from-blue-600 via-violet-600 to-fuchsia-600 p-8 text-white shadow-lg">
+      {/* Hero */}
+      <section className="rounded-3xl bg-linear-to-r from-blue-600 via-violet-600 to-fuchsia-600 p-8 text-white shadow-lg">
         <div className="max-w-3xl space-y-4">
           <span className="inline-flex rounded-full bg-white/15 px-3 py-1 text-sm backdrop-blur">
             Decision Intelligence for Tech Stacks
@@ -70,12 +63,12 @@ export default function Home() {
           </h1>
 
           <p className="text-white/90">
-            Compare technologies using scoring, trade-offs, and system-level
-            reasoning — not guesswork.
+            Compare technologies using scoring, trade-offs, and system-level reasoning — not guesswork.
           </p>
         </div>
       </section>
 
+      {/* Info Cards */}
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="rounded-2xl bg-blue-50 p-5 shadow-sm dark:bg-blue-950/30">
           <h3 className="font-semibold">⚡ Fast Decisions</h3>
@@ -99,6 +92,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Form */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card>
           <label className="mb-2 block font-medium">Project Type</label>
@@ -127,29 +121,17 @@ export default function Home() {
           </select>
         </Card>
 
+        {/* Chip Dropdown */}
         <Card>
           <label className="mb-2 block font-medium">Team Languages</label>
 
-          <select
-            multiple
-            className="h-40 w-full rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
+          <LanguageSelector
             value={teamLanguages}
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions).map(
-                (opt) => opt.value
-              );
-              setTeamLanguages(selected);
-            }}
-          >
-            {LANGUAGE_OPTIONS.map((lang) => (
-              <option key={lang} value={lang}>
-                {lang}
-              </option>
-            ))}
-          </select>
+            onChange={setTeamLanguages}
+          />
 
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Hold <b>Cmd</b> (Mac) or <b>Ctrl</b> (Windows) to select multiple.
+            Select one or more languages your team is comfortable with.
           </p>
         </Card>
 
@@ -165,8 +147,10 @@ export default function Home() {
         </Card>
       </div>
 
+      {/* Loading */}
       {loading && <LoadingSpinner />}
 
+      {/* Submit */}
       <button
         onClick={submit}
         disabled={loading}
