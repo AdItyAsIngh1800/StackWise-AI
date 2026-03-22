@@ -178,7 +178,10 @@ export default function Analytics() {
           </div>
 
           <Card>
-            <h3 className="mb-3 font-semibold">🔥 Most Used Languages</h3>
+            <h3 className="mb-3 text-lg font-semibold">🔥 Most Used Languages</h3>
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-300">
+              Shows how often each language was selected across recommendations.
+            </p>
 
             {topLanguagesChartData.length > 0 ? (
               <div style={{ width: "100%", height: 320 }}>
@@ -223,7 +226,10 @@ export default function Analytics() {
           </Card>
 
           <Card>
-            <h3 className="mb-3 font-semibold">📉 Confidence Trend</h3>
+            <h3 className="mb-3 text-lg font-semibold">📉 Confidence Trend</h3>
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-300">
+              Tracks how average confidence changes across saved recommendation runs.
+            </p>
 
             {confidenceTrendChartData.length > 0 ? (
               <div style={{ width: "100%", height: 320 }}>
@@ -270,7 +276,10 @@ export default function Analytics() {
           </Card>
 
           <Card>
-            <h3 className="mb-3 font-semibold">🕒 Recent Run Scores</h3>
+            <h3 className="mb-3 text-lg font-semibold">🕒 Recent Run Scores</h3>
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-300">
+              Compares scores of the most recent recommendation runs.
+            </p>
 
             {recentRunsChartData.length > 0 ? (
               <div style={{ width: "100%", height: 320 }}>

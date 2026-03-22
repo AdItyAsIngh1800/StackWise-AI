@@ -10,7 +10,7 @@ export default function Card({ children }: Props) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="rounded-xl bg-white p-4 shadow transition hover:shadow-md dark:bg-gray-800"
+      className="rounded-2xl border bg-white p-6 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
     >
       {children}
     </motion.div>

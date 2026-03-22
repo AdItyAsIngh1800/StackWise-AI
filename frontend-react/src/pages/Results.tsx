@@ -47,6 +47,16 @@ export default function Results() {
         </p>
       </section>
 
+      <Card>
+        <h2 className="mb-2 text-lg font-semibold">📌 Summary</h2>
+        <p className="text-gray-600 dark:text-gray-300">
+          For your project, <b>{winner?.language}</b> with{" "}
+          <b>{winner?.backend_framework}</b> is recommended due to strong
+          ecosystem support, compatibility with your constraints, and balanced
+          trade-offs.
+        </p>
+      </Card>
+
       <div className="rounded-2xl bg-linear-to-r from-green-500 to-emerald-500 p-5 text-white shadow transition hover:scale-[1.01] hover:shadow-lg">
         <h2 className="text-lg font-semibold">🏆 Best Choice</h2>
         <p className="mt-2 text-xl font-bold">
@@ -62,17 +72,21 @@ export default function Results() {
         <ConfidenceBar value={data.confidence ?? 0} />
       </div>
 
+      <div className="border-t dark:border-gray-700" />
+
       <RankingChart data={data.ranked_languages ?? []} />
 
       <ParetoChart data={data.pareto ?? []} />
 
+      <div className="border-t dark:border-gray-700" />
+
       <Card>
-        <h3 className="mb-3 font-semibold">🔍 Sensitivity Analysis</h3>
+        <h3 className="mb-3 text-lg font-semibold">🔍 Sensitivity Analysis</h3>
         <SensitivityTable sensitivity={data.sensitivity} />
       </Card>
 
       <Card>
-        <h3 className="mb-3 font-semibold">❌ Why Not Others</h3>
+        <h3 className="mb-3 text-lg font-semibold">❌ Why Not Others</h3>
         <WhyNotList items={data.why_not} />
       </Card>
 

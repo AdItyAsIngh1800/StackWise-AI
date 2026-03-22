@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 type Props = {
   children: React.ReactNode;
 };
 
 export default function Layout({ children }: Props) {
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window === "undefined") return false;
+  // ✅ Initialize state directly (no useEffect needed)
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem("darkMode") === "true";
   });
 
+  // ✅ Sync DOM + localStorage
   useEffect(() => {
     const root = document.documentElement;
 
@@ -23,8 +24,15 @@ export default function Layout({ children }: Props) {
     localStorage.setItem("darkMode", String(darkMode));
   }, [darkMode]);
 
+  const navClass = ({ isActive }: { isActive: boolean }) =>
+    `rounded-lg px-3 py-2 text-sm font-medium transition ${
+      isActive
+        ? "bg-blue-600 text-white"
+        : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+    }`;
+
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white">
       <header className="border-b bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div>
@@ -34,19 +42,22 @@ export default function Layout({ children }: Props) {
             </p>
           </div>
 
-          <div className="flex items-center gap-6">
-            <nav className="flex gap-4 text-sm font-medium">
-              <Link to="/" className="hover:text-blue-600">
+          <div className="flex items-center gap-4">
+            <nav className="flex gap-2">
+              <NavLink to="/" className={navClass}>
                 Home
-              </Link>
-              <Link to="/analytics" className="hover:text-blue-600">
+              </NavLink>
+              <NavLink to="/results" className={navClass}>
+                Results
+              </NavLink>
+              <NavLink to="/analytics" className={navClass}>
                 Analytics
-              </Link>
+              </NavLink>
             </nav>
 
             <button
               onClick={() => setDarkMode((prev) => !prev)}
-              className="rounded-lg border px-3 py-1 text-sm transition hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+              className="rounded-lg border px-3 py-2 text-sm transition hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
             >
               {darkMode ? "☀️ Light" : "🌙 Dark"}
             </button>
@@ -55,6 +66,10 @@ export default function Layout({ children }: Props) {
       </header>
 
       <main className="mx-auto max-w-6xl p-6">{children}</main>
+
+      <footer className="border-t py-4 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+        <p>StackWise AI • Decision Support System for Tech Stack Selection</p>
+      </footer>
     </div>
   );
 }
