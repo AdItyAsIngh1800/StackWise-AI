@@ -5,6 +5,9 @@ from fastapi import FastAPI, HTTPException, Query
 from backend.schemas import RecommendationRequest, RecommendationResponse
 from engine.recommend import recommend_stack
 
+from database.queries import get_top_languages, get_avg_confidence
+from database.operations import list_recommendation_runs
+
 from database.operations import (
     create_scenario,
     create_recommendation_run,
@@ -101,5 +104,45 @@ def get_run_detail(run_id: int):
 
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+# ---------------------------
+# Analytics: Top Languages
+# ---------------------------
+@app.get("/analytics/top-languages")
+def top_languages():
+    try:
+        data = get_top_languages()
+        return [
+            {"language": row["winner_language"], "count": row["count"]}
+            if isinstance(row, dict)
+            else {"language": row[0], "count": row[1]}
+            for row in data
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------
+# Analytics: Average Confidence
+# ---------------------------
+@app.get("/analytics/confidence")
+def avg_confidence():
+    try:
+        value = get_avg_confidence()
+        return {"average_confidence": value}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------
+# Analytics: Recent Runs
+# ---------------------------
+@app.get("/analytics/recent-runs")
+def recent_runs():
+    try:
+        return list_recommendation_runs(limit=10)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
