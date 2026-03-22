@@ -22,14 +22,22 @@ def create_scenario(scenario_name: str) -> int:
             with conn.cursor() as cur:
                 cur.execute(query, (scenario_name,))
                 row = cur.fetchone()
+
                 if row is None:
                     raise RuntimeError("Failed to create scenario: no ID returned from database.")
+
+                if isinstance(row, dict):
+                    scenario_id = row.get("id")
+                    if scenario_id is None:
+                        raise RuntimeError("Failed to create scenario: ID missing in returned row.")
+                    return int(scenario_id)
+
                 return int(row[0])
     finally:
         conn.close()
 
 
-def list_scenarios() -> list[dict]:
+def list_scenarios() -> list[dict[str, Any]]:
     query = """
     SELECT id, scenario_name, created_at
     FROM scenarios
@@ -42,14 +50,27 @@ def list_scenarios() -> list[dict]:
             cur.execute(query)
             rows = cur.fetchall()
 
-            return [
-                {
-                    "id": r[0],
-                    "scenario_name": r[1],
-                    "created_at": str(r[2]),
-                }
-                for r in rows
-            ]
+            scenarios: list[dict[str, Any]] = []
+
+            for row in rows:
+                if isinstance(row, dict):
+                    scenarios.append(
+                        {
+                            "id": row.get("id"),
+                            "scenario_name": row.get("scenario_name"),
+                            "created_at": str(row.get("created_at")),
+                        }
+                    )
+                else:
+                    scenarios.append(
+                        {
+                            "id": row[0],
+                            "scenario_name": row[1],
+                            "created_at": str(row[2]),
+                        }
+                    )
+
+            return scenarios
     finally:
         conn.close()
 
@@ -115,7 +136,7 @@ def create_recommendation_run(
 # ---------------------------
 # Fetch Recommendation Runs
 # ---------------------------
-def list_recommendation_runs(limit: int = 20) -> list[dict]:
+def list_recommendation_runs(limit: int = 20) -> list[dict[str, Any]]:
     query = """
     SELECT id, project_type, winner_language, winner_score, created_at
     FROM recommendation_runs
@@ -129,21 +150,36 @@ def list_recommendation_runs(limit: int = 20) -> list[dict]:
             cur.execute(query, (limit,))
             rows = cur.fetchall()
 
-            return [
-                {
-                    "id": r[0],
-                    "project_type": r[1],
-                    "winner_language": r[2],
-                    "score": r[3],
-                    "created_at": str(r[4]),
-                }
-                for r in rows
-            ]
+            runs: list[dict[str, Any]] = []
+
+            for row in rows:
+                if isinstance(row, dict):
+                    runs.append(
+                        {
+                            "id": row.get("id"),
+                            "project_type": row.get("project_type"),
+                            "winner_language": row.get("winner_language"),
+                            "score": row.get("winner_score"),
+                            "created_at": str(row.get("created_at")),
+                        }
+                    )
+                else:
+                    runs.append(
+                        {
+                            "id": row[0],
+                            "project_type": row[1],
+                            "winner_language": row[2],
+                            "score": row[3],
+                            "created_at": str(row[4]),
+                        }
+                    )
+
+            return runs
     finally:
         conn.close()
 
 
-def get_recommendation_run(run_id: int) -> dict | None:
+def get_recommendation_run(run_id: int) -> dict[str, Any] | None:
     query = """
     SELECT response_payload
     FROM recommendation_runs
@@ -159,6 +195,98 @@ def get_recommendation_run(run_id: int) -> dict | None:
             if row is None:
                 return None
 
-            return row[0]
+            if isinstance(row, dict):
+                value = row.get("response_payload")
+            else:
+                value = row[0]
+
+            if value is None:
+                return None
+
+            return value
+    finally:
+        conn.close()
+
+def get_scenario_by_id(scenario_id: int) -> dict[str, Any] | None:
+    query = """
+    SELECT id, scenario_name, created_at
+    FROM scenarios
+    WHERE id = %s;
+    """
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(query, (scenario_id,))
+            row = cur.fetchone()
+
+            if row is None:
+                return None
+
+            if isinstance(row, dict):
+                return {
+                    "id": row.get("id"),
+                    "scenario_name": row.get("scenario_name"),
+                    "created_at": str(row.get("created_at")),
+                }
+
+            return {
+                "id": row[0],
+                "scenario_name": row[1],
+                "created_at": str(row[2]),
+            }
+    finally:
+        conn.close()
+
+
+def get_runs_for_scenario(scenario_id: int) -> list[dict[str, Any]]:
+    query = """
+    SELECT id, project_type, winner_language, winner_framework,
+           winner_database, winner_deployment, winner_score,
+           confidence, created_at
+    FROM recommendation_runs
+    WHERE scenario_id = %s
+    ORDER BY created_at DESC;
+    """
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(query, (scenario_id,))
+            rows = cur.fetchall()
+
+            results: list[dict[str, Any]] = []
+
+            for row in rows:
+                if isinstance(row, dict):
+                    results.append(
+                        {
+                            "id": row.get("id"),
+                            "project_type": row.get("project_type"),
+                            "winner_language": row.get("winner_language"),
+                            "winner_framework": row.get("winner_framework"),
+                            "winner_database": row.get("winner_database"),
+                            "winner_deployment": row.get("winner_deployment"),
+                            "winner_score": row.get("winner_score"),
+                            "confidence": row.get("confidence"),
+                            "created_at": str(row.get("created_at")),
+                        }
+                    )
+                else:
+                    results.append(
+                        {
+                            "id": row[0],
+                            "project_type": row[1],
+                            "winner_language": row[2],
+                            "winner_framework": row[3],
+                            "winner_database": row[4],
+                            "winner_deployment": row[5],
+                            "winner_score": row[6],
+                            "confidence": row[7],
+                            "created_at": str(row[8]),
+                        }
+                    )
+
+            return results
     finally:
         conn.close()

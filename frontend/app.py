@@ -8,7 +8,7 @@ API_BASE_URL = "http://127.0.0.1:8000"
 RECOMMEND_URL = f"{API_BASE_URL}/recommend"
 HEALTH_URL = f"{API_BASE_URL}/health"
 SCENARIOS_URL = f"{API_BASE_URL}/scenarios"
-SCENARIO_DETAIL_URL = f"{API_BASE_URL}/scenario"
+SCENARIO_DETAIL_URL = f"{API_BASE_URL}/scenarios"
 
 st.set_page_config(page_title="StackWise-AI", layout="wide")
 
