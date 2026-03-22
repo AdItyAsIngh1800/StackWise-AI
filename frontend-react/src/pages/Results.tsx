@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import RecommendationCard from "../components/RecommendationCard";
@@ -12,12 +12,22 @@ import Card from "../components/Card";
 
 export default function Results() {
   const location = useLocation();
+  const navigate = useNavigate();
   const data = location.state as RecommendationResponse | undefined;
 
   if (!data) {
     return (
       <motion.div className="py-20 text-center">
         <h2 className="text-xl font-semibold">No Results Found</h2>
+        <p className="mt-2 text-gray-500 dark:text-gray-300">
+          Go back and generate a recommendation first.
+        </p>
+        <button
+          onClick={() => navigate("/")}
+          className="mt-6 rounded-xl bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700"
+        >
+          Go to Home
+        </button>
       </motion.div>
     );
   }
@@ -37,7 +47,7 @@ export default function Results() {
         </p>
       </section>
 
-      <div className="rounded-2xl bg-linear-to-r from-green-500 to-emerald-500 p-5 text-white shadow">
+      <div className="rounded-2xl bg-linear-to-r from-green-500 to-emerald-500 p-5 text-white shadow transition hover:scale-[1.01] hover:shadow-lg">
         <h2 className="text-lg font-semibold">🏆 Best Choice</h2>
         <p className="mt-2 text-xl font-bold">
           {winner?.language} + {winner?.backend_framework}
@@ -65,6 +75,15 @@ export default function Results() {
         <h3 className="mb-3 font-semibold">❌ Why Not Others</h3>
         <WhyNotList items={data.why_not} />
       </Card>
+
+      <div className="flex justify-center">
+        <button
+          onClick={() => navigate("/")}
+          className="rounded-xl bg-linear-to-r from-blue-600 to-violet-600 px-6 py-3 text-white shadow transition hover:scale-[1.02] hover:shadow-lg"
+        >
+          Run Another Scenario
+        </button>
+      </div>
     </motion.div>
   );
 }
