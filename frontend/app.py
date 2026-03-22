@@ -325,17 +325,22 @@ if backend_ok:
         st.dataframe(scenarios_df, use_container_width=True)
 
         st.subheader("Reload Scenario")
-        selected_id = st.selectbox(
-            "Select Scenario ID",
-            scenarios_df["id"].tolist(),
-        )
+        scenario_ids = [int(x) for x in scenarios_df["id"].dropna().tolist()]
 
-        if st.button("Load Scenario Details"):
-            scenario_detail = load_scenario_detail(int(selected_id))
-            if scenario_detail:
-                st.json(scenario_detail)
-            else:
-                st.warning("Could not load scenario details.")
+        if scenario_ids:
+            selected_id = st.selectbox(
+                "Select Scenario ID",
+                options=scenario_ids,
+            )
+
+            if st.button("Load Scenario Details"):
+                scenario_detail = load_scenario_detail(selected_id)
+                if scenario_detail:
+                    st.json(scenario_detail)
+                else:
+                    st.warning("Could not load scenario details.")
+        else:
+            st.warning("No valid scenario IDs found.")
     else:
         st.write("No saved scenarios found yet.")
 else:
