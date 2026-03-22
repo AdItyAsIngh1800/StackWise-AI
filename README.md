@@ -1,42 +1,26 @@
-# **🚀 StackWise-AI**
+
+
+# **🚀 StackWise AI**
 
   
 
 ### **Explainable Tech Stack Decision Support System**
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
 
-  
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white"/>
+  <img src="https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=black"/>
+  <img src="https://img.shields.io/badge/TypeScript-UI-3178C6?logo=typescript&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Vite-Build-646CFF?logo=vite&logoColor=white"/>
+  <img src="https://img.shields.io/badge/TailwindCSS-Styling-06B6D4?logo=tailwindcss&logoColor=white"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Tests-Pytest-brightgreen"/>
+  <img src="https://img.shields.io/badge/License-MIT-yellow"/>
+  <img src="https://img.shields.io/badge/Status-Production--Ready-success"/>
+</p>
 
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
 
-  
-
-![Streamlit](https://img.shields.io/badge/Streamlit-Frontend-red)
-
-  
-
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
-
-  
-
-![DuckDB](https://img.shields.io/badge/DuckDB-Analytics-orange)
-
-  
-
-![Polars](https://img.shields.io/badge/Polars-DataFrame-purple)
-
-  
-
-![Pytest](https://img.shields.io/badge/Tests-Pytest-brightgreen)
-
-  
-
-![License](https://img.shields.io/badge/License-MIT-yellow)
-
-  
-
-![Status](https://img.shields.io/badge/Status-Production--Ready-success)
 
 ----------
 
@@ -44,11 +28,11 @@
 
   
 
-**StackWise-AI**  is an  **explainable decision-support system**  that helps developers choose an appropriate tech stack for their projects.
+**StackWise AI**  is an  **explainable decision-support system**  that helps developers and teams choose the most suitable tech stack for their projects.
 
   
 
-It evaluates options using:
+It uses:
 
 -   constraint-based filtering
     
@@ -63,13 +47,13 @@ It evaluates options using:
 
   
 
-The system is built as a  **full-stack application**  with:
+Built as a **modern full-stack application** with:
 
 -   FastAPI backend
     
--   Streamlit frontend
+-   React + TypeScript frontend
     
--   PostgreSQL for scenario logging
+-   PostgreSQL database
     
 
 ----------
@@ -82,7 +66,7 @@ This project uses a **rule-based scoring engine combined with dataset-derived si
 
   
 
-It is  **not a machine learning model yet**, but is designed to be extended with ML-based ranking in future versions.
+👉 It is  **not a machine learning model yet**, but is designed to evolve into one (XGBoost / LightGBM ranking planned).
 
 ----------
 
@@ -90,17 +74,28 @@ It is  **not a machine learning model yet**, but is designed to be extended with
 
   
 
-Choosing a tech stack (language, backend framework, database, deployment) is often based on intuition or trends.
+Tech stack selection is often based on intuition, trends, or limited experience.
 
   
 
-This project aims to provide a  **structured, explainable approach**  to:
+This leads to:
+
+-   poor scalability decisions
+    
+-   unnecessary complexity
+    
+-   inconsistent system design
+    
+
+  
+
+StackWise AI introduces a **structured, explainable approach** to:
 
 -   compare multiple stack options
     
 -   evaluate trade-offs
     
--   understand why a choice is recommended
+-   justify decisions transparently
     
 
 ----------
@@ -109,42 +104,43 @@ This project aims to provide a  **structured, explainable approach**  to:
 
   
 
-## **🔹 1. Tech Stack Recommendation**
+## **🔹 Tech Stack Recommendation**
 
--   Suggests:
+  
+
+Suggests:
+
+-   programming language
     
-    -   programming language
-        
-    -   backend framework
-        
-    -   database
-        
-    -   deployment option
-        
+-   backend framework
+    
+-   database
+    
+-   deployment strategy
     
 
 ----------
 
-## **🔹 2. Constraint-Based Filtering**
+## **🔹 Constraint-Based Filtering**
 
   
 
-Removes invalid options based on:
+Filters out invalid stacks based on:
 
--   operational constraints
-    
--   scalability needs
-    
 -   project requirements
     
+-   scalability constraints
+    
+-   operational preferences
+    
 
 ----------
 
-## **🔹 3. Weighted Scoring Engine**
+## **🔹 Weighted Scoring Engine**
 
   
 
-Each option is scored using:
+Scores each option using:
 
 -   team familiarity
     
@@ -157,22 +153,22 @@ Each option is scored using:
 
 ----------
 
-## **🔹 4. Confidence Score**
+## **🔹 Confidence Score**
 
   
 
-Indicates reliability of recommendation based on:
+Quantifies reliability of recommendation using:
 
--   score gap between top options
+-   score separation
     
--   dataset/evidence strength
+-   evidence strength
     
--   team alignment
+-   alignment with inputs
     
 
 ----------
 
-## **🔹 5. Sensitivity Analysis**
+## **🔹 Sensitivity Analysis**
 
   
 
@@ -180,37 +176,28 @@ Answers:
 
   
 
-> “What happens if requirements change?”
+> “How stable is this decision if priorities change?”
+
+----------
+
+## **🔹 Pareto Frontier**
 
   
 
-Shows:
+Highlights  **non-dominated options**  to visualize trade-offs:
 
--   winner changes under different conditions
+-   performance vs simplicity
     
--   stability of decision
+-   scalability vs ease-of-use
     
 
 ----------
 
-## **🔹 6. Pareto Frontier**
+## **🔹 Scenario Logging (PostgreSQL)**
 
-  
-
-Identifies  **non-dominated options**  to highlight trade-offs:
-
--   performance vs ecosystem
+-   stores evaluation history
     
--   simplicity vs scalability
-    
-
-----------
-
-## **🔹 7. Scenario Logging (PostgreSQL)**
-
--   Stores past evaluations
-    
--   Enables review of previous decisions
+-   enables comparison of past decisions
     
 
 ----------
@@ -220,76 +207,62 @@ Identifies  **non-dominated options**  to highlight trade-offs:
 ```mermaid
 flowchart TD
 
-    %% ---------------------------
-    %% User Layer
-    %% ---------------------------
-    A[User<br>Streamlit UI]
+    A[User<br>React UI] --> B[FastAPI Backend]
 
-    %% ---------------------------
-    %% API Layer
-    %% ---------------------------
-    B[FastAPI Backend<br>API Layer]
+    B --> C[Recommendation Engine]
 
-    %% ---------------------------
-    %% Core Engine
-    %% ---------------------------
-    C[Recommendation Engine]
+    C --> C1[Constraint Filtering]
+    C --> C2[Weighted Scoring]
+    C --> C3[Confidence Calculation]
+    C --> C4[Sensitivity Analysis]
+    C --> C5[Pareto Optimization]
 
-    C1[Constraint Filtering]
-    C2[Weighted Scoring]
-    C3[Confidence Calculation]
-    C4[Sensitivity Analysis]
-    C5[Pareto Optimization]
+    C --> D[Evidence Layer]
+    D --> D1[Language Signals]
+    D --> D2[Catalog Mappings]
 
-    %% ---------------------------
-    %% Evidence Layer
-    %% ---------------------------
-    D[Evidence Layer]
-
-    D1[Language Signals<br>Popularity / Activity]
-    D2[Catalog Mappings<br>YAML Config]
-
-    %% ---------------------------
-    %% Data Layer
-    %% ---------------------------
-    E[(PostgreSQL<br>Scenario Logging)]
-
-    %% ---------------------------
-    %% Flow Connections
-    %% ---------------------------
-    A --> B
-    B --> C
-
-    C --> C1
-    C --> C2
-    C --> C3
-    C --> C4
-    C --> C5
-
-    C --> D
-    D --> D1
-    D --> D2
-
-    B --> E
-
+    B --> E[(PostgreSQL<br>Scenario Logging)]
 ```
 
 ----------
 
-# **🧱 Project Structure**
+# **📂 Project Structure**
 
 ```
 stackwise-ai/
 ├── backend/        # FastAPI backend
-├── frontend/       # Streamlit UI
+├── frontend/       # React frontend
 ├── engine/         # Recommendation logic
 ├── evidence/       # Dataset signals
 ├── database/       # PostgreSQL integration
 ├── catalog/        # Stack mappings (YAML)
-├── pipelines/      # Data processing scripts
+├── pipelines/      # Data processing
+├── data/           # Processed datasets
 ├── tests/          # Unit tests
-├── data/           # Processed + raw data
 ```
+
+----------
+
+# **🖼️ Screenshots**
+
+  
+
+
+### 🏠 Home Page
+
+![Home](./screenshots/home.png)
+
+  
+
+### 📊 Results Page
+
+![Results](./screenshots/results.png)
+
+  
+
+### 📈 Analytics Dashboard
+
+![Analytics](./screenshots/analytics.png)
 
 ----------
 
@@ -310,9 +283,15 @@ stackwise-ai/
 
 ### **Frontend**
 
--   Streamlit
+-   React
     
--   Requests
+-   TypeScript
+    
+-   Vite
+    
+-   Tailwind CSS
+    
+-   Recharts
     
 
   
@@ -324,8 +303,6 @@ stackwise-ai/
 -   Pandas
     
 -   DuckDB
-    
--   PyArrow
     
 
   
@@ -350,7 +327,7 @@ stackwise-ai/
 
   
 
-## **1️⃣ Clone the repository**
+## **1️⃣ Clone**
 
 ```
 git clone https://github.com/your-username/StackWise-AI.git
@@ -359,31 +336,29 @@ cd StackWise-AI
 
 ----------
 
-## **2️⃣ Create virtual environment**
+## **2️⃣ Backend Setup**
 
 ```
 python -m venv venv
-source venv/bin/activate   # Mac/Linux
-venv\Scripts\activate      # Windows
-```
-
-----------
-
-## **3️⃣ Install dependencies**
-
-```
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+Run:
+
+```
+uvicorn backend.main:app --reload
+```
+
+👉 http://127.0.0.1:8000/docs
+
 ----------
 
-## **4️⃣ Setup PostgreSQL**
+## **3️⃣ Database Setup**
 
 ```
 CREATE DATABASE stackwise_ai;
 ```
-
-Run schema:
 
 ```
 psql -d stackwise_ai -f database/schema.sql
@@ -391,23 +366,15 @@ psql -d stackwise_ai -f database/schema.sql
 
 ----------
 
-## **5️⃣ Run backend**
+## **4️⃣ Frontend Setup**
 
 ```
-uvicorn backend.main:app --reload
+cd frontend
+npm install
+npm run dev
 ```
 
-Open:
-
-👉 http://127.0.0.1:8000/docs
-
-----------
-
-## **6️⃣ Run frontend**
-
-```
-streamlit run frontend/app.py
-```
+👉 http://localhost:5173
 
 ----------
 
@@ -456,13 +423,13 @@ pytest
 
 ----------
 
-# **📊 Current Limitations**
+# **📊 Limitations**
 
--   Rule-based scoring (no ML model yet)
+-   Rule-based scoring (no ML yet)
     
--   Limited stack options (can be expanded)
+-   Limited stack catalog
     
--   Dataset signals are simplified
+-   Simplified dataset signals
     
 
 ----------
@@ -471,13 +438,13 @@ pytest
 
 -   ML-based ranking (XGBoost / LightGBM)
     
--   Feedback learning system
+-   Feedback-driven learning
     
--   Deployment (Docker + Cloud)
+-   Cloud deployment
     
--   Expanded stack catalog
+-   Authentication system
     
--   Advanced analytics dashboard
+-   Advanced analytics
     
 
 ----------
@@ -490,7 +457,7 @@ Aditya Singh
 
 ----------
 
-# **📄 License**
+# **📜 License**
 
   
 
@@ -502,14 +469,16 @@ MIT License
 
   
 
-This project focuses on **structured decision-making rather than blind automation**, emphasizing:
+This project focuses on:
 
--   transparency
+-   **explainability over black-box decisions**
     
--   explainability
+-   **structured engineering thinking**
     
--   trade-off awareness
+-   **real-world trade-off analysis**
     
 
 ----------
+
+
 
