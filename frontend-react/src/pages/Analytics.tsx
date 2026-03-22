@@ -4,7 +4,8 @@ import API from "../api/client";
 import Card from "../components/Card";
 
 type TopLanguage = {
-  language: string;
+  language?: string;
+  winner_language?: string;
   count: number;
 };
 
@@ -15,6 +16,10 @@ type RecentRun = {
   score: number;
   created_at: string;
 };
+
+function getLanguageLabel(item: TopLanguage): string {
+  return item.language ?? item.winner_language ?? "Unknown";
+}
 
 export default function Analytics() {
   const [topLanguages, setTopLanguages] = useState<TopLanguage[]>([]);
@@ -75,7 +80,7 @@ export default function Analytics() {
             <div className="rounded-2xl bg-fuchsia-500 p-5 text-white shadow">
               <p className="text-sm opacity-80">Top Language</p>
               <h2 className="text-2xl font-bold">
-                {topLanguages[0]?.language ?? "-"}
+                {topLanguages.length > 0 ? getLanguageLabel(topLanguages[0]) : "-"}
               </h2>
             </div>
           </div>
@@ -87,10 +92,10 @@ export default function Analytics() {
               <div className="space-y-2">
                 {topLanguages.map((lang, i) => (
                   <div
-                    key={`${lang.language}-${i}`}
+                    key={`${getLanguageLabel(lang)}-${i}`}
                     className="flex justify-between rounded border p-3 dark:border-gray-700"
                   >
-                    <span>{lang.language}</span>
+                    <span>{getLanguageLabel(lang)}</span>
                     <span className="font-semibold">{lang.count}</span>
                   </div>
                 ))}
