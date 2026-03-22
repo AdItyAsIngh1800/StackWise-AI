@@ -7,6 +7,18 @@ import type { RecommendationResponse } from "../types/api";
 import Card from "../components/Card";
 import LoadingSpinner from "../components/LoadingSpinner";
 
+const LANGUAGE_OPTIONS = [
+  "python",
+  "javascript",
+  "typescript",
+  "java",
+  "go",
+  "c++",
+  "rust",
+  "c#",
+  "php",
+];
+
 export default function Home() {
   const navigate = useNavigate();
 
@@ -45,20 +57,53 @@ export default function Home() {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6"
+      className="space-y-8"
     >
-      <section className="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
-        <h1 className="text-3xl font-bold">Build Your Stack</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
-          Choose your project requirements and get an explainable recommendation.
-        </p>
+      <section className="overflow-hidden rounded-3xl bg-linear-to-r from-blue-600 via-violet-600 to-fuchsia-600 p-8 text-white shadow-lg">
+        <div className="max-w-3xl space-y-4">
+          <span className="inline-flex rounded-full bg-white/15 px-3 py-1 text-sm backdrop-blur">
+            Decision Intelligence for Tech Stacks
+          </span>
+
+          <h1 className="text-4xl font-bold md:text-5xl">
+            Choose the right stack with confidence
+          </h1>
+
+          <p className="text-white/90">
+            Compare technologies using scoring, trade-offs, and system-level
+            reasoning — not guesswork.
+          </p>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="rounded-2xl bg-blue-50 p-5 shadow-sm dark:bg-blue-950/30">
+          <h3 className="font-semibold">⚡ Fast Decisions</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Get recommendations instantly based on your constraints.
+          </p>
+        </div>
+
+        <div className="rounded-2xl bg-violet-50 p-5 shadow-sm dark:bg-violet-950/30">
+          <h3 className="font-semibold">📊 Explainable</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Understand why a stack is chosen.
+          </p>
+        </div>
+
+        <div className="rounded-2xl bg-fuchsia-50 p-5 shadow-sm dark:bg-fuchsia-950/30">
+          <h3 className="font-semibold">⚖️ Trade-offs</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Compare alternatives using Pareto analysis.
+          </p>
+        </div>
       </section>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card>
           <label className="mb-2 block font-medium">Project Type</label>
           <select
-            className="w-full rounded border p-2 dark:border-gray-700 dark:bg-gray-900"
+            className="w-full rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
             value={projectType}
             onChange={(e) => setProjectType(e.target.value)}
           >
@@ -72,7 +117,7 @@ export default function Home() {
         <Card>
           <label className="mb-2 block font-medium">Expected Scale</label>
           <select
-            className="w-full rounded border p-2 dark:border-gray-700 dark:bg-gray-900"
+            className="w-full rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
             value={expectedScale}
             onChange={(e) => setExpectedScale(e.target.value)}
           >
@@ -84,28 +129,38 @@ export default function Home() {
 
         <Card>
           <label className="mb-2 block font-medium">Team Languages</label>
-          <input
-            className="w-full rounded border p-2 dark:border-gray-700 dark:bg-gray-900"
-            value={teamLanguages.join(",")}
-            onChange={(e) =>
-              setTeamLanguages(
-                e.target.value
-                  .split(",")
-                  .map((x) => x.trim())
-                  .filter(Boolean)
-              )
-            }
-          />
+
+          <select
+            multiple
+            className="h-40 w-full rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
+            value={teamLanguages}
+            onChange={(e) => {
+              const selected = Array.from(e.target.selectedOptions).map(
+                (opt) => opt.value
+              );
+              setTeamLanguages(selected);
+            }}
+          >
+            {LANGUAGE_OPTIONS.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang}
+              </option>
+            ))}
+          </select>
+
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+            Hold <b>Cmd</b> (Mac) or <b>Ctrl</b> (Windows) to select multiple.
+          </p>
         </Card>
 
         <Card>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 font-medium">
             <input
               type="checkbox"
               checked={lowOps}
               onChange={(e) => setLowOps(e.target.checked)}
             />
-            Prefer managed / low-ops setup
+            Prefer low-ops / managed setup
           </label>
         </Card>
       </div>
@@ -115,7 +170,7 @@ export default function Home() {
       <button
         onClick={submit}
         disabled={loading}
-        className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+        className="rounded-xl bg-linear-to-r from-blue-600 to-violet-600 px-6 py-3 text-white shadow hover:scale-[1.02]"
       >
         {loading ? "Generating..." : "Get Recommendation"}
       </button>
