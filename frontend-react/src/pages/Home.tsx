@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../api/client";
 import type { RecommendationResponse } from "../types/api";
 import Card from "../components/Card";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -39,18 +40,19 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <section className="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
         <h1 className="text-3xl font-bold">Build Your Stack</h1>
-        <p className="mt-2 text-gray-600">
-          Choose your project requirements and get an explainable stack recommendation.
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
+          Choose your project requirements and get an explainable recommendation
+          based on score, evidence, trade-offs, and decision stability.
         </p>
-      </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card>
           <label className="mb-2 block font-medium">Project Type</label>
           <select
-            className="w-full rounded border p-2"
+            className="w-full rounded border p-2 dark:border-gray-700 dark:bg-gray-900"
             value={projectType}
             onChange={(e) => setProjectType(e.target.value)}
           >
@@ -59,12 +61,15 @@ export default function Home() {
             <option value="ai-ml">AI/ML</option>
             <option value="enterprise">Enterprise</option>
           </select>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+            Select the primary type of system you are planning to build.
+          </p>
         </Card>
 
         <Card>
           <label className="mb-2 block font-medium">Expected Scale</label>
           <select
-            className="w-full rounded border p-2"
+            className="w-full rounded border p-2 dark:border-gray-700 dark:bg-gray-900"
             value={expectedScale}
             onChange={(e) => setExpectedScale(e.target.value)}
           >
@@ -72,12 +77,16 @@ export default function Home() {
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+            Small for side projects, medium for standard production systems, high
+            for large-scale or enterprise workloads.
+          </p>
         </Card>
 
         <Card>
           <label className="mb-2 block font-medium">Team Languages</label>
           <input
-            className="w-full rounded border p-2"
+            className="w-full rounded border p-2 dark:border-gray-700 dark:bg-gray-900"
             value={teamLanguages.join(",")}
             onChange={(e) =>
               setTeamLanguages(
@@ -89,13 +98,13 @@ export default function Home() {
             }
             placeholder="python,javascript,typescript"
           />
-          <p className="mt-2 text-sm text-gray-500">
-            Enter comma-separated language names known by your team.
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+            Enter comma-separated languages your team already knows.
           </p>
         </Card>
 
         <Card>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 font-medium">
             <input
               type="checkbox"
               checked={lowOps}
@@ -103,20 +112,29 @@ export default function Home() {
             />
             Prefer managed / low-ops setup
           </label>
-
-          <p className="mt-2 text-sm text-gray-500">
-            Recommended for teams who want faster deployment and less infrastructure management.
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+            Recommended for teams that want faster deployment and lower
+            infrastructure management overhead.
           </p>
         </Card>
       </div>
 
-      <button
-        onClick={submit}
-        disabled={loading}
-        className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
-      >
-        {loading ? "Generating..." : "Get Recommendation"}
-      </button>
+      {loading && <LoadingSpinner />}
+
+      <div className="flex items-center gap-4">
+        <button
+          onClick={submit}
+          disabled={loading}
+          className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
+        >
+          {loading ? "Generating..." : "Get Recommendation"}
+        </button>
+
+        <span className="text-sm text-gray-500 dark:text-gray-300">
+          The recommendation uses weighted scoring, confidence estimation,
+          sensitivity analysis, and Pareto evaluation.
+        </span>
+      </div>
     </div>
   );
 }
