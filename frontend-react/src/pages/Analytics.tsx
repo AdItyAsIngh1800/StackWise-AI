@@ -188,6 +188,7 @@ export default function Analytics() {
                     <XAxis dataKey="language" stroke="#64748b" />
                     <YAxis stroke="#64748b" />
                     <Tooltip
+                      cursor={{ fill: "rgba(99, 102, 241, 0.1)" }}
                       formatter={(value) => [String(value), "Count"]}
                       contentStyle={{
                         backgroundColor: "#111827",
@@ -196,7 +197,11 @@ export default function Analytics() {
                         color: "#ffffff",
                       }}
                     />
-                    <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                    <Bar
+                      dataKey="count"
+                      radius={[8, 8, 0, 0]}
+                      animationDuration={600}
+                    >
                       {topLanguagesChartData.map((entry, index) => (
                         <Cell
                           key={`cell-${entry.language}`}
@@ -228,6 +233,7 @@ export default function Analytics() {
                     <XAxis dataKey="date" stroke="#64748b" />
                     <YAxis domain={[0, 1]} stroke="#64748b" />
                     <Tooltip
+                      cursor={{ stroke: "#7c3aed", strokeWidth: 1 }}
                       formatter={(value) => [
                         typeof value === "number"
                           ? value.toFixed(3)
@@ -247,6 +253,8 @@ export default function Analytics() {
                       stroke="#7c3aed"
                       strokeWidth={3}
                       dot={{ r: 5 }}
+                      activeDot={{ r: 7 }}
+                      animationDuration={700}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -272,6 +280,7 @@ export default function Analytics() {
                     <XAxis dataKey="id" stroke="#64748b" />
                     <YAxis domain={[0, 1]} stroke="#64748b" />
                     <Tooltip
+                      cursor={{ fill: "rgba(16, 185, 129, 0.1)" }}
                       formatter={(value, name) => {
                         if (name === "score") {
                           return [
@@ -294,7 +303,11 @@ export default function Analytics() {
                         color: "#ffffff",
                       }}
                     />
-                    <Bar dataKey="score" radius={[8, 8, 0, 0]}>
+                    <Bar
+                      dataKey="score"
+                      radius={[8, 8, 0, 0]}
+                      animationDuration={600}
+                    >
                       {recentRunsChartData.map((entry, index) => (
                         <Cell
                           key={`cell-${entry.id}`}
