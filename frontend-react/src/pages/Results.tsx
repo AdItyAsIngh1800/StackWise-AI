@@ -1,4 +1,6 @@
 import { useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+
 import RecommendationCard from "../components/RecommendationCard";
 import ConfidenceBar from "../components/ConfidenceBar";
 import SensitivityTable from "../components/SensitivityTable";
@@ -14,33 +16,33 @@ export default function Results() {
 
   if (!data) {
     return (
-      <Card>
-        <h1 className="text-2xl font-bold">Results</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
-          No result loaded. Go back to Home and generate a recommendation first.
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-center py-20"
+      >
+        <h2 className="text-xl font-semibold">No Results Found</h2>
+        <p className="mt-2 text-gray-500">
+          Generate a recommendation first.
         </p>
-      </Card>
+      </motion.div>
     );
   }
 
-  const winner = data.winner;
-  const summary = winner
-    ? `Recommended stack: ${winner.language} + ${winner.backend_framework ?? "-"} + ${winner.database ?? "-"} + ${winner.deployment ?? "-"}.`
-    : "No recommendation available.";
-
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
       <section className="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
         <h1 className="text-3xl font-bold">Results</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
-          Review the recommendation, confidence level, ranking, trade-offs, and
-          reasons behind the decision.
-        </p>
       </section>
 
       <Card>
-        <h2 className="mb-2 text-lg font-semibold">📌 Final Decision</h2>
-        <p className="text-gray-700 dark:text-gray-200">{summary}</p>
+        <h2 className="mb-2 font-semibold">📌 Final Decision</h2>
+        <p>{data.winner?.language}</p>
       </Card>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -55,6 +57,6 @@ export default function Results() {
       <ParetoChart data={data.pareto ?? []} />
 
       <WhyNotList items={data.why_not} />
-    </div>
+    </motion.div>
   );
 }

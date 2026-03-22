@@ -1,36 +1,27 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 type Props = {
   children: React.ReactNode;
 };
 
-function getInitialDarkMode(): boolean {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem("darkMode") === "true";
-}
-
 export default function Layout({ children }: Props) {
-  const darkMode = getInitialDarkMode();
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("darkMode") === "true";
+  });
 
-  if (darkMode) {
-    document.documentElement.classList.add("dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-  }
+  useEffect(() => {
+    const root = document.documentElement;
 
-  function toggleDarkMode() {
-    const next = !darkMode;
-
-    if (next) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("darkMode", "true");
+    if (darkMode) {
+      root.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("darkMode", "false");
+      root.classList.remove("dark");
     }
 
-    window.location.reload();
-  }
+    localStorage.setItem("darkMode", String(darkMode));
+  }, [darkMode]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
@@ -54,7 +45,7 @@ export default function Layout({ children }: Props) {
             </nav>
 
             <button
-              onClick={toggleDarkMode}
+              onClick={() => setDarkMode((prev) => !prev)}
               className="rounded-lg border px-3 py-1 text-sm transition hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
             >
               {darkMode ? "☀️ Light" : "🌙 Dark"}

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
 import API from "../api/client";
 import type { RecommendationResponse } from "../types/api";
 import Card from "../components/Card";
@@ -39,12 +41,16 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
       <section className="rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800">
         <h1 className="text-3xl font-bold">Build Your Stack</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-300">
-          Choose your project requirements and get an explainable recommendation
-          based on score, evidence, trade-offs, and decision stability.
+          Choose your project requirements and get an explainable recommendation.
         </p>
       </section>
 
@@ -61,9 +67,6 @@ export default function Home() {
             <option value="ai-ml">AI/ML</option>
             <option value="enterprise">Enterprise</option>
           </select>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Select the primary type of system you are planning to build.
-          </p>
         </Card>
 
         <Card>
@@ -77,10 +80,6 @@ export default function Home() {
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Small for side projects, medium for standard production systems, high
-            for large-scale or enterprise workloads.
-          </p>
         </Card>
 
         <Card>
@@ -96,15 +95,11 @@ export default function Home() {
                   .filter(Boolean)
               )
             }
-            placeholder="python,javascript,typescript"
           />
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Enter comma-separated languages your team already knows.
-          </p>
         </Card>
 
         <Card>
-          <label className="flex items-center gap-2 font-medium">
+          <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={lowOps}
@@ -112,29 +107,18 @@ export default function Home() {
             />
             Prefer managed / low-ops setup
           </label>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Recommended for teams that want faster deployment and lower
-            infrastructure management overhead.
-          </p>
         </Card>
       </div>
 
       {loading && <LoadingSpinner />}
 
-      <div className="flex items-center gap-4">
-        <button
-          onClick={submit}
-          disabled={loading}
-          className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
-        >
-          {loading ? "Generating..." : "Get Recommendation"}
-        </button>
-
-        <span className="text-sm text-gray-500 dark:text-gray-300">
-          The recommendation uses weighted scoring, confidence estimation,
-          sensitivity analysis, and Pareto evaluation.
-        </span>
-      </div>
-    </div>
+      <button
+        onClick={submit}
+        disabled={loading}
+        className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+      >
+        {loading ? "Generating..." : "Get Recommendation"}
+      </button>
+    </motion.div>
   );
 }
