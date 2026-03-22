@@ -33,3 +33,4 @@ class RecommendationResponse(BaseModel):
     confidence: float | None = None
     sensitivity: dict[str, Any] | None = None
     pareto: List[dict[str, Any]] | None = None
+    why_not: List[dict[str, str]] | None = None
