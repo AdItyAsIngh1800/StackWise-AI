@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import pandas as pd
 import requests
 import streamlit as st
-import pandas as pd
 
 API_BASE_URL = "http://127.0.0.1:8000"
 RECOMMEND_URL = f"{API_BASE_URL}/recommend"
 HEALTH_URL = f"{API_BASE_URL}/health"
 SCENARIOS_URL = f"{API_BASE_URL}/scenarios"
+SCENARIO_DETAIL_URL = f"{API_BASE_URL}/scenario"
 
 st.set_page_config(page_title="StackWise-AI", layout="wide")
 
@@ -30,6 +31,18 @@ def load_scenarios() -> list[dict]:
         return data if isinstance(data, list) else []
     except requests.RequestException:
         return []
+
+
+def load_scenario_detail(scenario_id: int) -> dict | None:
+    try:
+        response = requests.get(f"{SCENARIO_DETAIL_URL}/{scenario_id}", timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        if isinstance(data, dict) and "error" not in data:
+            return data
+        return None
+    except requests.RequestException:
+        return None
 
 
 def confidence_label(value: float) -> str:
@@ -135,14 +148,15 @@ if run_clicked:
         if scenario_name.strip():
             query_params["scenario_name"] = scenario_name.strip()
 
-        response = requests.post(
-            RECOMMEND_URL,
-            params=query_params,
-            json=payload,
-            timeout=10,
-        )
-        response.raise_for_status()
-        data = response.json()
+        with st.spinner("Generating recommendation..."):
+            response = requests.post(
+                RECOMMEND_URL,
+                params=query_params,
+                json=payload,
+                timeout=10,
+            )
+            response.raise_for_status()
+            data = response.json()
 
         winner = data.get("winner")
         alternatives = data.get("alternatives", [])
@@ -150,6 +164,7 @@ if run_clicked:
         confidence = float(data.get("confidence", 0.0))
         sensitivity = data.get("sensitivity", {})
         pareto = data.get("pareto", [])
+        why_not = data.get("why_not", [])
         explanation = data.get("explanation", "No explanation available.")
 
         # -----------------------------
@@ -159,6 +174,19 @@ if run_clicked:
         st.write(build_summary_text(winner))
 
         if winner:
+            st.header("📌 Final Decision")
+            team_text = ", ".join(team_languages) if team_languages else "multiple possible stacks"
+            st.success(
+                f"""
+Recommended: {winner['language']} stack
+
+Best suited for:
+- {project_type} projects
+- {expected_scale} scale
+- team familiar with {team_text}
+"""
+            )
+
             col1, col2 = st.columns([1.2, 1])
 
             with col1:
@@ -240,8 +268,26 @@ if run_clicked:
         if pareto:
             pareto_df = pd.DataFrame(pareto)
             st.dataframe(pareto_df, use_container_width=True)
+            if {"ecosystem", "score"}.issubset(set(pareto_df.columns)):
+                st.scatter_chart(
+                    pareto_df,
+                    x="ecosystem",
+                    y="score",
+                )
         else:
             st.write("No Pareto optimal options found.")
+
+        st.divider()
+
+        # -----------------------------
+        # Why Not Selected
+        # -----------------------------
+        st.header("❌ Why Not Selected")
+        if why_not:
+            why_not_df = pd.DataFrame(why_not)
+            st.dataframe(why_not_df, use_container_width=True)
+        else:
+            st.write("No comparison insights available.")
 
         st.divider()
 
@@ -261,8 +307,8 @@ if run_clicked:
         except Exception:
             detail = exc.response.text if exc.response is not None else str(exc)
         st.error(f"Backend returned an error: {detail}")
-    except Exception as exc:
-        st.error(f"Unexpected error: {exc}")
+    except Exception:
+        st.error("Something went wrong while generating the recommendation. Please try again.")
 
 st.divider()
 
@@ -277,6 +323,19 @@ if backend_ok:
     if scenarios:
         scenarios_df = pd.DataFrame(scenarios)
         st.dataframe(scenarios_df, use_container_width=True)
+
+        st.subheader("Reload Scenario")
+        selected_id = st.selectbox(
+            "Select Scenario ID",
+            scenarios_df["id"].tolist(),
+        )
+
+        if st.button("Load Scenario Details"):
+            scenario_detail = load_scenario_detail(int(selected_id))
+            if scenario_detail:
+                st.json(scenario_detail)
+            else:
+                st.warning("Could not load scenario details.")
     else:
         st.write("No saved scenarios found yet.")
 else:
