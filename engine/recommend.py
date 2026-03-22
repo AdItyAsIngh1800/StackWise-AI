@@ -81,6 +81,57 @@ def _pick_deployment(language: str, context: dict[str, Any]) -> str | None:
     return options[0]
 
 
+def _build_why_not(
+    ranked: list[dict[str, Any]],
+    context: dict[str, Any],
+) -> list[dict[str, str]]:
+    reasons: list[dict[str, str]] = []
+
+    if not ranked:
+        return reasons
+
+    winner = ranked[0]["language"]
+    team_languages = context.get("team_languages", [])
+    project_type = context.get("project_type")
+    low_ops = context.get("low_ops", False)
+    prototype_only = context.get("prototype_only", False)
+
+    for item in ranked[1:4]:
+        language = item["language"]
+
+        if language == winner:
+            continue
+
+        reason_parts: list[str] = []
+
+        if team_languages and language not in team_languages:
+            reason_parts.append("lower team familiarity")
+
+        if low_ops and language in {"java", "go", "rust"}:
+            reason_parts.append("higher operational complexity for low-ops preference")
+
+        if prototype_only and language in {"java", "rust"}:
+            reason_parts.append("slower fit for MVP / prototype workflows")
+
+        if project_type == "api" and language == "javascript":
+            reason_parts.append("weaker fit than Python or Go for this API profile")
+
+        if project_type == "enterprise" and language == "python":
+            reason_parts.append("less aligned than Java or TypeScript for enterprise-style backend structure")
+
+        if not reason_parts:
+            reason_parts.append("lower overall score under the current project profile")
+
+        reasons.append(
+            {
+                "language": language,
+                "reason": "; ".join(reason_parts),
+            }
+        )
+
+    return reasons
+
+
 def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
     candidates = [
         "python",
@@ -136,6 +187,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
         )
 
     pareto = compute_pareto_frontier(pareto_input)
+    why_not = _build_why_not(ranked, context)
 
     return {
         "winner": winner,
@@ -145,6 +197,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
         "confidence": confidence,
         "sensitivity": sensitivity,
         "pareto": pareto,
+        "why_not": why_not,
     }
 
 
