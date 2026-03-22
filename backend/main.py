@@ -1,37 +1,51 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend.schemas import RecommendationRequest, RecommendationResponse
-from engine.recommend import recommend_stack
-
-
-from database.operations import list_recommendation_runs
-
 from database.operations import (
-    create_scenario,
     create_recommendation_run,
-    list_scenarios,
-    get_scenario_by_id,
-    get_runs_for_scenario,
+    create_scenario,
     get_recommendation_run,
+    get_runs_for_scenario,
+    get_scenario_by_id,
+    list_recommendation_runs,
+    list_scenarios,
 )
-
 from database.queries import (
-    get_top_languages,
     get_avg_confidence,
     get_confidence_trend,
+    get_top_languages,
     get_top_stacks,
 )
+from engine.recommend import recommend_stack
 
 app = FastAPI(title="StackWise-AI")
 
+# ---------------------------
+# CORS
+# ---------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+
+# ---------------------------
+# Health Check
+# ---------------------------
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
 
+# ---------------------------
+# Root Info
+# ---------------------------
 @app.get("/")
 def root():
     return {
@@ -40,6 +54,9 @@ def root():
     }
 
 
+# ---------------------------
+# Recommendation Endpoint
+# ---------------------------
 @app.post("/recommend", response_model=RecommendationResponse)
 def recommend(
     request: RecommendationRequest,
@@ -68,6 +85,9 @@ def recommend(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ---------------------------
+# Scenario Routes
+# ---------------------------
 @app.get("/scenarios")
 def get_all_scenarios():
     try:
@@ -97,7 +117,7 @@ def get_scenario_detail(scenario_id: int):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 @app.get("/runs/{run_id}")
 def get_run_detail(run_id: int):
@@ -113,28 +133,19 @@ def get_run_detail(run_id: int):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 # ---------------------------
-# Analytics: Top Languages
+# Analytics Routes
 # ---------------------------
 @app.get("/analytics/top-languages")
 def top_languages():
     try:
-        data = get_top_languages()
-        return [
-            {"language": row["winner_language"], "count": row["count"]}
-            if isinstance(row, dict)
-            else {"language": row[0], "count": row[1]}
-            for row in data
-        ]
+        return get_top_languages()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------------------
-# Analytics: Average Confidence
-# ---------------------------
 @app.get("/analytics/confidence")
 def avg_confidence():
     try:
@@ -144,28 +155,25 @@ def avg_confidence():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------------------
-# Analytics: Recent Runs
-# ---------------------------
-@app.get("/analytics/recent-runs")
-def recent_runs():
-    try:
-        return list_recommendation_runs(limit=10)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-
 @app.get("/analytics/confidence-trend")
 def confidence_trend():
     try:
         return get_confidence_trend()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 @app.get("/analytics/top-stacks")
 def top_stacks():
     try:
         return get_top_stacks()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/analytics/recent-runs")
+def recent_runs():
+    try:
+        return list_recommendation_runs(limit=10)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
