@@ -6,57 +6,101 @@ from typing import Any
 from database.connection import get_db_connection
 
 
-def log_recommendation(
+# ---------------------------
+# Scenario Operations
+# ---------------------------
+def create_scenario(scenario_name: str) -> int:
+    query = """
+    INSERT INTO scenarios (scenario_name)
+    VALUES (%s)
+    RETURNING id;
+    """
+
+    conn = get_db_connection()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (scenario_name,))
+                row = cur.fetchone()
+                if row is None:
+                    raise RuntimeError("Failed to create scenario: no ID returned from database.")
+                return int(row[0])
+    finally:
+        conn.close()
+
+
+def list_scenarios() -> list[dict]:
+    query = """
+    SELECT id, scenario_name, created_at
+    FROM scenarios
+    ORDER BY created_at DESC;
+    """
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            return [
+                {
+                    "id": r[0],
+                    "scenario_name": r[1],
+                    "created_at": str(r[2]),
+                }
+                for r in rows
+            ]
+    finally:
+        conn.close()
+
+
+# ---------------------------
+# Recommendation Logging
+# ---------------------------
+def create_recommendation_run(
     request_data: dict[str, Any],
     result_data: dict[str, Any],
-    scenario_name: str | None = None,
+    scenario_id: int | None = None,
 ) -> None:
     winner = result_data.get("winner") or {}
 
     query = """
-    INSERT INTO recommendation_logs (
-        scenario_name,
+    INSERT INTO recommendation_runs (
+        scenario_id,
         project_type,
         team_languages,
-        low_ops,
-        expected_scale,
-        prefer_enterprise,
-        prototype_only,
-        rapid_schema_changes,
-        needs_cache,
-        prefer_portability,
+        input_payload,
         winner_language,
         winner_framework,
         winner_database,
         winner_deployment,
         winner_score,
-        recommendation_payload,
-        explanation
+        confidence,
+        explanation,
+        response_payload,
+        sensitivity_payload,
+        pareto_payload,
+        why_not_payload
     )
-    VALUES (
-        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-        %s, %s, %s, %s, %s, %s, %s
-    );
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
     """
 
     values = (
-        scenario_name,
+        scenario_id,
         request_data.get("project_type"),
         json.dumps(request_data.get("team_languages", [])),
-        request_data.get("low_ops", False),
-        request_data.get("expected_scale", "medium"),
-        request_data.get("prefer_enterprise", False),
-        request_data.get("prototype_only", False),
-        request_data.get("rapid_schema_changes", False),
-        request_data.get("needs_cache", False),
-        request_data.get("prefer_portability", False),
+        json.dumps(request_data),
         winner.get("language"),
         winner.get("backend_framework"),
         winner.get("database"),
         winner.get("deployment"),
         winner.get("score"),
-        json.dumps(result_data),
+        result_data.get("confidence"),
         result_data.get("explanation"),
+        json.dumps(result_data),
+        json.dumps(result_data.get("sensitivity")),
+        json.dumps(result_data.get("pareto")),
+        json.dumps(result_data.get("why_not")),
     )
 
     conn = get_db_connection()
@@ -68,65 +112,52 @@ def log_recommendation(
         conn.close()
 
 
-def get_scenarios() -> list[dict[str, Any]]:
+# ---------------------------
+# Fetch Recommendation Runs
+# ---------------------------
+def list_recommendation_runs(limit: int = 20) -> list[dict]:
     query = """
-    SELECT id, scenario_name, project_type, created_at
-    FROM recommendation_logs
+    SELECT id, project_type, winner_language, winner_score, created_at
+    FROM recommendation_runs
     ORDER BY created_at DESC
-    LIMIT 20;
+    LIMIT %s;
     """
 
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(query)
+            cur.execute(query, (limit,))
             rows = cur.fetchall()
 
-            scenarios: list[dict[str, Any]] = []
-
-            for row in rows:
-                if isinstance(row, dict):
-                    scenarios.append(
-                        {
-                            "id": row.get("id"),
-                            "scenario_name": row.get("scenario_name"),
-                            "project_type": row.get("project_type"),
-                            "created_at": str(row.get("created_at")),
-                        }
-                    )
-                else:
-                    scenarios.append(
-                        {
-                            "id": row[0],
-                            "scenario_name": row[1],
-                            "project_type": row[2],
-                            "created_at": str(row[3]),
-                        }
-                    )
-
-            return scenarios
+            return [
+                {
+                    "id": r[0],
+                    "project_type": r[1],
+                    "winner_language": r[2],
+                    "score": r[3],
+                    "created_at": str(r[4]),
+                }
+                for r in rows
+            ]
     finally:
         conn.close()
 
 
-def get_scenario_by_id(scenario_id: int) -> dict[str, Any] | None:
+def get_recommendation_run(run_id: int) -> dict | None:
     query = """
-    SELECT recommendation_payload
-    FROM recommendation_logs
+    SELECT response_payload
+    FROM recommendation_runs
     WHERE id = %s;
     """
 
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            cur.execute(query, (scenario_id,))
+            cur.execute(query, (run_id,))
             row = cur.fetchone()
 
-            if not row:
+            if row is None:
                 return None
-
-            if isinstance(row, dict):
-                return row.get("recommendation_payload")
 
             return row[0]
     finally:
