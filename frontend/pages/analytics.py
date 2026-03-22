@@ -72,3 +72,41 @@ try:
 
 except Exception:
     st.error("Failed to load recent runs")
+
+
+st.divider()
+st.header("📉 Confidence Trend Over Time")
+
+try:
+    res = requests.get(f"{API_BASE_URL}/analytics/confidence-trend")
+    data = res.json()
+
+    df = pd.DataFrame(data)
+
+    if not df.empty:
+        df["date"] = pd.to_datetime(df["date"])
+        st.line_chart(df.set_index("date")["avg_confidence"])
+    else:
+        st.write("No trend data available.")
+
+except Exception:
+    st.error("Failed to load confidence trend")
+
+
+st.divider()
+st.header("🏆 Top Stack Combinations")
+
+try:
+    res = requests.get(f"{API_BASE_URL}/analytics/top-stacks")
+    data = res.json()
+
+    df = pd.DataFrame(data)
+
+    if not df.empty:
+        st.dataframe(df, use_container_width=True)
+        st.bar_chart(df.set_index("language")["count"])
+    else:
+        st.write("No stack data available.")
+
+except Exception:
+    st.error("Failed to load stack combinations")

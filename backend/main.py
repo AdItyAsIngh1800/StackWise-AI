@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, Query
 from backend.schemas import RecommendationRequest, RecommendationResponse
 from engine.recommend import recommend_stack
 
-from database.queries import get_top_languages, get_avg_confidence
+
 from database.operations import list_recommendation_runs
 
 from database.operations import (
@@ -15,6 +15,13 @@ from database.operations import (
     get_scenario_by_id,
     get_runs_for_scenario,
     get_recommendation_run,
+)
+
+from database.queries import (
+    get_top_languages,
+    get_avg_confidence,
+    get_confidence_trend,
+    get_top_stacks,
 )
 
 app = FastAPI(title="StackWise-AI")
@@ -144,5 +151,21 @@ def avg_confidence():
 def recent_runs():
     try:
         return list_recommendation_runs(limit=10)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.get("/analytics/confidence-trend")
+def confidence_trend():
+    try:
+        return get_confidence_trend()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.get("/analytics/top-stacks")
+def top_stacks():
+    try:
+        return get_top_stacks()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
