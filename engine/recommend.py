@@ -7,6 +7,8 @@ from engine.confidence import compute_confidence
 from engine.sensitivity import run_sensitivity_analysis
 from engine.pareto import compute_pareto_frontier
 from engine.similarity import find_similar_stacks
+from engine.ml.predict import rank_with_model
+
 
 LANGUAGE_TO_BACKEND_FRAMEWORKS = {
     "python": "fastapi",
@@ -94,7 +96,7 @@ def build_explanation(winner: dict[str, Any] | None, context: dict[str, Any]) ->
 def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
     candidates = ["python", "javascript", "typescript", "java", "go", "rust"]
 
-    ranked = rank_languages(candidates, context)
+    ranked = rank_with_model(context, candidates)
     recommendations = build_recommendations(ranked)
 
     winner = recommendations[0] if recommendations else None
