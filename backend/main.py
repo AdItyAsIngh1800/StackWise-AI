@@ -3,7 +3,12 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.schemas import RecommendationRequest, RecommendationResponse
+from backend.schemas import (
+    RecommendationRequest,
+    RecommendationResponse,
+    NaturalLanguageRecommendationRequest,
+    NaturalLanguageRecommendationResponse,
+)
 from database.operations import (
     create_recommendation_run,
     create_scenario,
@@ -16,16 +21,15 @@ from database.operations import (
 from database.queries import (
     get_avg_confidence,
     get_confidence_trend,
+    get_runs_by_project_type,
     get_top_languages,
     get_top_stacks,
 )
+from engine.nl_parser import parse_natural_language_query
 from engine.recommend import recommend_stack
 
 app = FastAPI(title="StackWise-AI")
 
-# ---------------------------
-# CORS
-# ---------------------------
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
@@ -35,17 +39,11 @@ app.add_middleware(
 )
 
 
-# ---------------------------
-# Health Check
-# ---------------------------
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
 
-# ---------------------------
-# Root Info
-# ---------------------------
 @app.get("/")
 def root():
     return {
@@ -54,9 +52,6 @@ def root():
     }
 
 
-# ---------------------------
-# Recommendation Endpoint
-# ---------------------------
 @app.post("/recommend", response_model=RecommendationResponse)
 def recommend(
     request: RecommendationRequest,
@@ -64,7 +59,6 @@ def recommend(
 ):
     try:
         context = request.model_dump()
-
         result = recommend_stack(context)
 
         scenario_id = None
@@ -85,9 +79,24 @@ def recommend(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------------------
-# Scenario Routes
-# ---------------------------
+@app.post(
+    "/recommend/natural-language",
+    response_model=NaturalLanguageRecommendationResponse,
+)
+def recommend_from_text(request: NaturalLanguageRecommendationRequest):
+    try:
+        parsed = parse_natural_language_query(request.query)
+        parsed_request = RecommendationRequest(**parsed)
+        result = recommend_stack(parsed_request.model_dump())
+
+        return {
+            "parsed_input": parsed_request,
+            "recommendation": result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/scenarios")
 def get_all_scenarios():
     try:
@@ -135,9 +144,6 @@ def get_run_detail(run_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------------------
-# Analytics Routes
-# ---------------------------
 @app.get("/analytics/top-languages")
 def top_languages():
     try:
@@ -167,6 +173,14 @@ def confidence_trend():
 def top_stacks():
     try:
         return get_top_stacks()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/analytics/project-types")
+def project_type_distribution():
+    try:
+        return get_runs_by_project_type()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

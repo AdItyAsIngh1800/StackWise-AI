@@ -2,216 +2,122 @@ from __future__ import annotations
 
 from typing import Any
 
-from engine.confidence import compute_confidence
-from engine.pareto import compute_pareto_frontier
 from engine.scoring import rank_languages
+from engine.confidence import compute_confidence
 from engine.sensitivity import run_sensitivity_analysis
-from evidence.language_signals import get_language_signal
-from evidence.mappings import (
-    LANGUAGE_TO_BACKEND_FRAMEWORKS,
-    LANGUAGE_TO_DATABASES,
-    LANGUAGE_TO_DEPLOYMENT,
-)
+from engine.pareto import compute_pareto_frontier
+from engine.similarity import find_similar_stacks
+
+LANGUAGE_TO_BACKEND_FRAMEWORKS = {
+    "python": "fastapi",
+    "javascript": "express",
+    "typescript": "nestjs",
+    "java": "spring boot",
+    "go": "gin",
+    "rust": "actix-web",
+}
+
+LANGUAGE_TO_DATABASES = {
+    "python": "postgresql",
+    "javascript": "postgresql",
+    "typescript": "postgresql",
+    "java": "postgresql",
+    "go": "postgresql",
+    "rust": "postgresql",
+}
+
+LANGUAGE_TO_DEPLOYMENT = {
+    "python": "render",
+    "javascript": "render",
+    "typescript": "render",
+    "java": "aws ecs",
+    "go": "aws ecs",
+    "rust": "docker",
+}
 
 
-def _pick_framework(language: str, context: dict[str, Any]) -> str | None:
-    options = LANGUAGE_TO_BACKEND_FRAMEWORKS.get(language, [])
-    if not options:
-        return None
-
-    if language == "python":
-        if context.get("prefer_enterprise"):
-            return "django" if "django" in options else options[0]
-        return "fastapi" if "fastapi" in options else options[0]
-
-    if language == "typescript":
-        return "nestjs" if "nestjs" in options else options[0]
-
-    if language == "javascript":
-        return "express" if "express" in options else options[0]
-
-    if language == "java":
-        return "spring-boot" if "spring-boot" in options else options[0]
-
-    if language == "go":
-        return "gin" if "gin" in options else options[0]
-
-    return options[0]
-
-
-def _pick_database(language: str, context: dict[str, Any]) -> str | None:
-    options = LANGUAGE_TO_DATABASES.get(language, [])
-    if not options:
-        return None
-
-    if context.get("prototype_only"):
-        return "sqlite" if "sqlite" in options else options[0]
-
-    if context.get("rapid_schema_changes"):
-        return "mongodb" if "mongodb" in options else options[0]
-
-    if context.get("needs_cache"):
-        return "redis" if "redis" in options else options[0]
-
-    return "postgresql" if "postgresql" in options else options[0]
-
-
-def _pick_deployment(language: str, context: dict[str, Any]) -> str | None:
-    options = LANGUAGE_TO_DEPLOYMENT.get(language, [])
-    if not options:
-        return None
-
-    if context.get("low_ops"):
-        if language in {"javascript", "typescript"} and "vercel" in options:
-            return "vercel"
-        if "render" in options:
-            return "render"
-        if "railway" in options:
-            return "railway"
-
-    if context.get("expected_scale") == "high":
-        if "kubernetes" in options:
-            return "kubernetes"
-        if "ecs" in options:
-            return "ecs"
-
-    if context.get("prefer_portability") and "docker-vm" in options:
-        return "docker-vm"
-
-    return options[0]
-
-
-def _build_why_not(
-    ranked: list[dict[str, Any]],
-    context: dict[str, Any],
-) -> list[dict[str, str]]:
-    reasons: list[dict[str, str]] = []
-
-    if not ranked:
-        return reasons
-
-    winner = ranked[0]["language"]
-    team_languages = context.get("team_languages", [])
-    project_type = context.get("project_type")
-    low_ops = context.get("low_ops", False)
-    prototype_only = context.get("prototype_only", False)
-
-    for item in ranked[1:4]:
-        language = item["language"]
-
-        if language == winner:
-            continue
-
-        reason_parts: list[str] = []
-
-        if team_languages and language not in team_languages:
-            reason_parts.append("lower team familiarity")
-
-        if low_ops and language in {"java", "go", "rust"}:
-            reason_parts.append("higher operational complexity for low-ops preference")
-
-        if prototype_only and language in {"java", "rust"}:
-            reason_parts.append("slower fit for MVP / prototype workflows")
-
-        if project_type == "api" and language == "javascript":
-            reason_parts.append("weaker fit than Python or Go for this API profile")
-
-        if project_type == "enterprise" and language == "python":
-            reason_parts.append("less aligned than Java or TypeScript for enterprise-style backend structure")
-
-        if not reason_parts:
-            reason_parts.append("lower overall score under the current project profile")
-
-        reasons.append(
-            {
-                "language": language,
-                "reason": "; ".join(reason_parts),
-            }
-        )
-
-    return reasons
-
-
-def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
-    candidates = [
-        "python",
-        "javascript",
-        "typescript",
-        "java",
-        "go",
-        "rust",
-    ]
-
-    ranked = rank_languages(candidates, context)
-    confidence = compute_confidence(ranked, context)
-    sensitivity = run_sensitivity_analysis(context, candidates)
-
-    top = ranked[:3]
+def build_recommendations(
+    ranked_languages: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     recommendations: list[dict[str, Any]] = []
 
-    for item in top:
+    for item in ranked_languages:
         language = item["language"]
-
         recommendations.append(
             {
                 "language": language,
-                "score": item["score"],
-                "backend_framework": _pick_framework(language, context),
-                "database": _pick_database(language, context),
-                "deployment": _pick_deployment(language, context),
+                "score": float(item["score"]),
+                "backend_framework": LANGUAGE_TO_BACKEND_FRAMEWORKS.get(language),
+                "database": LANGUAGE_TO_DATABASES.get(language),
+                "deployment": LANGUAGE_TO_DEPLOYMENT.get(language),
             }
         )
+
+    return recommendations
+
+
+def build_why_not(
+    winner: dict[str, Any] | None,
+    alternatives: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    if winner is None:
+        return []
+
+    why_not: list[dict[str, str]] = []
+    winner_score = float(winner["score"])
+
+    for alt in alternatives:
+        gap = round(winner_score - float(alt["score"]), 3)
+        why_not.append(
+            {
+                "language": str(alt["language"]),
+                "reason": f"Scored lower than the selected option by {gap}.",
+            }
+        )
+
+    return why_not
+
+
+def build_explanation(winner: dict[str, Any] | None, context: dict[str, Any]) -> str:
+    if winner is None:
+        return "No suitable stack could be recommended for the provided inputs."
+
+    language = winner["language"]
+    project_type = context.get("project_type", "project")
+
+    return (
+        f"For this {project_type} profile, {language} was recommended because it "
+        f"offers the strongest balance of fit, ecosystem support, and operational practicality."
+    )
+
+
+def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
+    candidates = ["python", "javascript", "typescript", "java", "go", "rust"]
+
+    ranked = rank_languages(candidates, context)
+    recommendations = build_recommendations(ranked)
 
     winner = recommendations[0] if recommendations else None
+    alternatives = recommendations[1:]
 
-    explanation = None
-    if winner:
-        explanation = (
-            f"{winner['language']} is recommended due to strong alignment with "
-            f"project requirements, team familiarity, operational preference, "
-            f"and ecosystem strength. The recommended backend framework is "
-            f"{winner['backend_framework']}, the suggested database is "
-            f"{winner['database']}, and the preferred deployment option is "
-            f"{winner['deployment']}."
-        )
+    explanation = build_explanation(winner, context)
+    confidence = compute_confidence(ranked, context)
+    sensitivity = run_sensitivity_analysis(context, candidates)
+    pareto = compute_pareto_frontier(ranked)
+    why_not = build_why_not(winner, alternatives)
 
-    pareto_input = []
-    for item in ranked:
-        signals = get_language_signal(item["language"])
-        pareto_input.append(
-            {
-                "language": item["language"],
-                "score": item["score"],
-                "ecosystem": signals["ecosystem"],
-            }
-        )
-
-    pareto = compute_pareto_frontier(pareto_input)
-    why_not = _build_why_not(ranked, context)
+    similar_stacks = []
+    if winner is not None:
+      similar_stacks = find_similar_stacks(context, winner["language"], limit=3)
 
     return {
         "winner": winner,
-        "alternatives": recommendations[1:],
+        "alternatives": alternatives,
         "ranked_languages": ranked,
         "explanation": explanation,
         "confidence": confidence,
         "sensitivity": sensitivity,
         "pareto": pareto,
         "why_not": why_not,
+        "similar_stacks": similar_stacks,
     }
-
-
-if __name__ == "__main__":
-    sample_context = {
-        "project_type": "api",
-        "team_languages": ["python"],
-        "low_ops": True,
-        "expected_scale": "medium",
-        "prefer_enterprise": False,
-        "prototype_only": False,
-        "rapid_schema_changes": False,
-        "needs_cache": False,
-        "prefer_portability": False,
-    }
-
-    print(recommend_stack(sample_context))
