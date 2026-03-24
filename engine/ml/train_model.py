@@ -3,14 +3,17 @@ from __future__ import annotations
 from pathlib import Path
 
 import joblib
-import numpy as np
 import pandas as pd
-from lightgbm import LGBMClassifier
-from sklearn.metrics import classification_report, roc_auc_score
+from lightgbm import LGBMRanker
 from sklearn.model_selection import GroupShuffleSplit
 
 MODEL_PATH = Path("engine/ml/model.pkl")
 TRAINING_DATA_PATH = Path("data/processed/training_data.csv")
+
+
+def _build_group_sizes(query_ids: pd.Series) -> list[int]:
+    # query_ids must already be ordered so equal ids are contiguous
+    return query_ids.groupby(query_ids).size().tolist()
 
 
 def train_model() -> None:
@@ -47,26 +50,33 @@ def train_model() -> None:
         "is_recommended_language",
     ]
 
-    X = df[feature_columns]
-    y = df["label"]
-    groups = df["query_id"]
-
     print("Dataset shape:", df.shape)
-    print("\nLabel distribution:")
-    print(y.value_counts())
-    print("\nUnique queries:", groups.nunique())
+    print("\nRelevance label distribution:")
+    print(df["label"].value_counts())
+    print("\nUnique queries:", df["query_id"].nunique())
     print("\nMissing values:")
-    print(X.isnull().sum())
+    print(df[feature_columns].isnull().sum())
 
     splitter = GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
-    train_idx, test_idx = next(splitter.split(X, y, groups=groups))
+    train_idx, test_idx = next(
+        splitter.split(df[feature_columns], df["label"], groups=df["query_id"])
+    )
 
-    X_train = X.iloc[train_idx]
-    X_test = X.iloc[test_idx]
-    y_train = y.iloc[train_idx]
-    y_test = y.iloc[test_idx]
+    train_df = df.iloc[train_idx].sort_values("query_id").reset_index(drop=True)
+    test_df = df.iloc[test_idx].sort_values("query_id").reset_index(drop=True)
 
-    model = LGBMClassifier(
+    X_train = train_df[feature_columns]
+    y_train = train_df["label"]
+    group_train = _build_group_sizes(train_df["query_id"])
+
+    X_test = test_df[feature_columns]
+    y_test = test_df["label"]
+    group_test = _build_group_sizes(test_df["query_id"])
+
+    model = LGBMRanker(
+        objective="lambdarank",
+        metric="ndcg",
+        ndcg_eval_at=[1, 3, 6],
         n_estimators=200,
         learning_rate=0.05,
         num_leaves=31,
@@ -75,27 +85,16 @@ def train_model() -> None:
         force_row_wise=True,
         verbosity=-1,
         random_state=42,
-        class_weight="balanced",
     )
 
-    model.fit(X_train, y_train)
-
-    y_pred = np.asarray(model.predict(X_test)).ravel()
-    y_proba = np.asarray(model.predict_proba(X_test))
-
-    if y_proba.ndim == 2 and y_proba.shape[1] > 1:
-        y_prob = y_proba[:, 1]
-    else:
-        y_prob = y_proba.ravel()
-
-    print("\nClassification report:")
-    print(classification_report(y_test, y_pred, zero_division=0))
-
-    try:
-        auc = roc_auc_score(y_test, y_prob)
-        print("\nROC-AUC:", auc)
-    except ValueError:
-        print("\nROC-AUC could not be computed on this split.")
+    model.fit(
+        X_train,
+        y_train,
+        group=group_train,
+        eval_set=[(X_test, y_test)],
+        eval_group=[group_test],
+        eval_at=[1, 3, 6],
+    )
 
     feature_importance = pd.DataFrame(
         {
@@ -109,7 +108,7 @@ def train_model() -> None:
 
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(model, MODEL_PATH)
-    print(f"\nSaved model to {MODEL_PATH}")
+    print(f"\nSaved ranker to {MODEL_PATH}")
 
 
 if __name__ == "__main__":

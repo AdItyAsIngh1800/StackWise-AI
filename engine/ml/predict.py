@@ -23,20 +23,14 @@ def rank_with_model(context: dict[str, Any], candidates: list[str]) -> list[dict
     if model is None:
         raise FileNotFoundError(f"Model not found at {MODEL_PATH}")
 
-    # build features for each candidate
     feature_rows = [build_features(context, language) for language in candidates]
-
-    # IMPORTANT: convert to DataFrame (matches training)
     X = pd.DataFrame(feature_rows)
 
-    # predict probabilities
-    probs = np.asarray(model.predict_proba(X))
+    # Keep inference column order aligned with training.
+    if hasattr(model, "feature_name_"):
+        X = X.reindex(columns=list(model.feature_name_), fill_value=0)
 
-    # get probability of class 1
-    if probs.ndim == 2 and probs.shape[1] > 1:
-        scores = probs[:, 1]
-    else:
-        scores = probs.ravel()
+    scores = np.asarray(model.predict(X)).ravel()
 
     results: list[dict] = []
     for i, language in enumerate(candidates):
@@ -47,7 +41,5 @@ def rank_with_model(context: dict[str, Any], candidates: list[str]) -> list[dict
             }
         )
 
-    # sort descending
     results.sort(key=lambda item: item["score"], reverse=True)
-
     return results

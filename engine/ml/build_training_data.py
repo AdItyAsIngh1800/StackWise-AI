@@ -9,8 +9,6 @@ from database.connection import get_db_connection
 from evidence.language_signals import get_language_signal
 
 CANDIDATES = ["python", "javascript", "typescript", "java", "go", "rust"]
-PROJECT_TYPES = ["api", "web"]
-SCALES = ["low", "medium", "high"]
 
 
 def load_feedback_rows() -> list[dict]:
@@ -87,7 +85,7 @@ def build_training_dataframe() -> pd.DataFrame:
     output_rows: list[dict] = []
 
     for feedback in feedback_rows:
-        query_id = feedback["id"]
+        query_id = int(feedback["id"])
         project_type = str(feedback["project_type"]).strip().lower()
         expected_scale = str(feedback["expected_scale"]).strip().lower()
         recommended_language = str(feedback["recommended_language"]).strip().lower()
@@ -97,60 +95,64 @@ def build_training_dataframe() -> pd.DataFrame:
         for language in CANDIDATES:
             signals = get_language_signal(language)
 
-            row = {
-                "query_id": query_id,
+            output_rows.append(
+                {
+                    "query_id": query_id,
 
-                # project type one-hot
-                "project_type_api": int(project_type == "api"),
-                "project_type_web": int(project_type == "web"),
+                    # project type one-hot
+                    "project_type_api": int(project_type == "api"),
+                    "project_type_web": int(project_type == "web"),
 
-                # expected scale one-hot
-                "expected_scale_low": int(expected_scale == "low"),
-                "expected_scale_medium": int(expected_scale == "medium"),
-                "expected_scale_high": int(expected_scale == "high"),
+                    # expected scale one-hot
+                    "expected_scale_low": int(expected_scale == "low"),
+                    "expected_scale_medium": int(expected_scale == "medium"),
+                    "expected_scale_high": int(expected_scale == "high"),
 
-                # project constraints
-                "low_ops": int(bool(feedback["low_ops"])),
-                "prefer_enterprise": int(bool(feedback["prefer_enterprise"])),
-                "prototype_only": int(bool(feedback["prototype_only"])),
-                "rapid_schema_changes": int(bool(feedback["rapid_schema_changes"])),
-                "needs_cache": int(bool(feedback["needs_cache"])),
-                "prefer_portability": int(bool(feedback["prefer_portability"])),
+                    # project constraints
+                    "low_ops": int(bool(feedback["low_ops"])),
+                    "prefer_enterprise": int(bool(feedback["prefer_enterprise"])),
+                    "prototype_only": int(bool(feedback["prototype_only"])),
+                    "rapid_schema_changes": int(bool(feedback["rapid_schema_changes"])),
+                    "needs_cache": int(bool(feedback["needs_cache"])),
+                    "prefer_portability": int(bool(feedback["prefer_portability"])),
 
-                # candidate language identity
-                "candidate_python": int(language == "python"),
-                "candidate_javascript": int(language == "javascript"),
-                "candidate_typescript": int(language == "typescript"),
-                "candidate_java": int(language == "java"),
-                "candidate_go": int(language == "go"),
-                "candidate_rust": int(language == "rust"),
+                    # candidate identity
+                    "candidate_python": int(language == "python"),
+                    "candidate_javascript": int(language == "javascript"),
+                    "candidate_typescript": int(language == "typescript"),
+                    "candidate_java": int(language == "java"),
+                    "candidate_go": int(language == "go"),
+                    "candidate_rust": int(language == "rust"),
 
-                # team language context
-                "team_knows_python": int("python" in team_languages),
-                "team_knows_javascript": int("javascript" in team_languages),
-                "team_knows_typescript": int("typescript" in team_languages),
-                "team_knows_java": int("java" in team_languages),
-                "team_knows_go": int("go" in team_languages),
-                "team_knows_rust": int("rust" in team_languages),
+                    # team language context
+                    "team_knows_python": int("python" in team_languages),
+                    "team_knows_javascript": int("javascript" in team_languages),
+                    "team_knows_typescript": int("typescript" in team_languages),
+                    "team_knows_java": int("java" in team_languages),
+                    "team_knows_go": int("go" in team_languages),
+                    "team_knows_rust": int("rust" in team_languages),
 
-                # direct team-candidate compatibility
-                "team_has_candidate_language": int(language in team_languages),
+                    # direct compatibility
+                    "team_has_candidate_language": int(language in team_languages),
 
-                # static evidence for candidate language
-                "ecosystem": float(signals.get("ecosystem", 0.0)),
-                "activity": float(signals.get("activity", 0.0)),
-                "popularity": float(signals.get("popularity", 0.0)),
+                    # candidate evidence
+                    "ecosystem": float(signals.get("ecosystem", 0.0)),
+                    "activity": float(signals.get("activity", 0.0)),
+                    "popularity": float(signals.get("popularity", 0.0)),
 
-                # whether the rules engine recommended this language
-                "is_recommended_language": int(language == recommended_language),
+                    # rules-engine hint
+                    "is_recommended_language": int(language == recommended_language),
 
-                # target
-                "label": int(language == selected_language),
-            }
+                    # ranking relevance
+                    "label": int(language == selected_language),
+                }
+            )
 
-            output_rows.append(row)
+    df = pd.DataFrame(output_rows)
 
-    return pd.DataFrame(output_rows)
+    # Keep rows sorted by query so group sizes line up with row order.
+    df = df.sort_values(["query_id"]).reset_index(drop=True)
+    return df
 
 
 if __name__ == "__main__":
