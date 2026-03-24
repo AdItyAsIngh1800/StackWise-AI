@@ -1,13 +1,11 @@
 
-
-
-
 # **🚀 StackWise AI**
 
   
 
 ### **Explainable + ML-Powered Tech Stack Decision System**
 
+```
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white"/>
@@ -16,12 +14,12 @@
   <img src="https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql&logoColor=white"/>
   <img src="https://img.shields.io/badge/LightGBM-ML%20Ranking-orange"/>
   <img src="https://img.shields.io/badge/Semantic%20Search-Embeddings-purple"/>
-  <img src="https://img.shields.io/badge/Tests-Pytest-brightgreen"/>
+  <img src="https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white"/>
   <img src="https://img.shields.io/badge/License-MIT-yellow"/>
   <img src="https://img.shields.io/badge/Status-Production--Ready-success"/>
 </p>
 
-
+```
 
 ----------
 
@@ -37,7 +35,7 @@ Unlike typical recommendation tools, it combines:
 
 -   rule-based reasoning
     
--   ML-based ranking (LightGBM)
+-   ML-based ranking (LightGBM LambdaRank)
     
 -   semantic search (embeddings)
     
@@ -63,6 +61,8 @@ Unlike typical recommendation tools, it combines:
 -   📈 **Analytics dashboard (NDCG, trends)**
     
 -   ⚖️ **Pareto trade-off optimization**
+    
+-   🐳 **Fully Dockerized system**
     
 
 ----------
@@ -91,9 +91,9 @@ This leads to:
 -   poor architectural decisions
     
 
-----------
+  
 
-👉 **StackWise AI solves this by turning stack selection into a structured, explainable, and learnable system.**
+👉 **StackWise AI converts stack selection into a structured, explainable, and learnable system.**
 
 ----------
 
@@ -101,76 +101,60 @@ This leads to:
 
   
 
-## **🔹 1. ML-Based Recommendation Engine**
+## **🔹 ML-Based Recommendation Engine**
 
--   Uses **LightGBM ranking model**
+-   LightGBM ranking model
     
--   Learns from feedback data
+-   Learns from feedback
     
--   Optimizes ranking using  **NDCG**
+-   Optimized using  **NDCG**
     
-
-----------
-
-## **🔹 2. Explainable Decision Logic**
 
   
 
-Each recommendation includes:
+## **🔹 Explainable Decisions**
 
 -   confidence score
     
--   explanation
+-   reasoning
+    
+-   alternatives
     
 -   trade-offs
     
--   alternative options
-    
-
-----------
-
-## **🔹 3. Constraint-Based Filtering**
 
   
 
-Filters stacks based on:
+## **🔹 Constraint-Based Filtering**
 
--   scalability needs
+-   scalability constraints
     
 -   operational complexity
     
 -   team expertise
     
 
-----------
-
-## **🔹 4. Semantic Search**
-
   
 
-Search using natural language:
+## **🔹 Semantic Search**
 
 ```
 "fast backend for scalable systems"
 ```
 
-Returns similar stack options using embeddings.
-
-----------
-
-## **🔹 5. Sensitivity Analysis**
+Returns similar stacks using embeddings.
 
   
 
-Evaluates:
+## **🔹 Sensitivity Analysis**
 
   
 
-> “How stable is this recommendation if inputs change?”
+Evaluates decision stability under changing conditions.
 
-----------
+  
 
-## **🔹 6. Pareto Frontier**
+## **🔹 Pareto Frontier**
 
   
 
@@ -183,32 +167,26 @@ Identifies optimal trade-offs between:
 -   simplicity
     
 
-----------
+  
 
-## **🔹 7. Feedback Learning Loop**
+## **🔹 Feedback Learning Loop**
 
--   user feedback stored in PostgreSQL
+-   feedback stored in PostgreSQL
     
--   training dataset generated
+-   dataset generation
     
--   ML model retrained
+-   model retraining
     
-
-----------
-
-## **🔹 8. Analytics Dashboard**
 
   
 
-Tracks:
+## **🔹 Analytics Dashboard**
 
 -   recommendation trends
     
--   confidence scores
+-   confidence metrics
     
--   ML performance (NDCG)
-    
--   usage patterns
+-   ML evaluation (NDCG)
     
 
 ----------
@@ -239,7 +217,6 @@ flowchart TD
     F --> G[Training Data Pipeline]
     G --> H[Model Training]
 ```
-
 ----------
 
 # **📂 Project Structure**
@@ -247,17 +224,17 @@ flowchart TD
 ```
 stackwise-ai/
 ├── backend/         # FastAPI API layer
-├── frontend/        # React + TS UI
-├── engine/
-│   ├── ml/          # ML training + prediction
-│   ├── similarity/  # semantic search
-│   ├── scoring/     # rule-based logic
+├── frontend/        # React + TypeScript UI
+├── engine/          # Core logic + ML
+│   ├── ml/          # Training + prediction
+│   ├── similarity/  # Semantic search
 │   └── ...
-├── evidence/        # dataset signals
-├── database/        # PostgreSQL ops
-├── pipelines/       # data + training pipelines
-├── data/            # datasets
+├── evidence/        # Dataset signals
+├── database/        # PostgreSQL operations
+├── pipelines/       # Data + ML pipelines
+├── data/            # Processed datasets
 ├── tests/           # API tests
+├── docker-compose.yml
 ```
 
 ----------
@@ -266,16 +243,24 @@ stackwise-ai/
 
   
 
+
 ### **🏠 Home Page**
+
+  
 
 ![Home](./screenshots/home.png)
 
+  
+
 ### **📊 Results Page**
+
 ![Results](./screenshots/results.png)
 
-### **📈 Analytics Dashboard**
-![Analytics](./screenshots/analytics.png)
+  
 
+### **📈 Analytics Dashboard**
+
+![Analytics](./screenshots/analytics.png)
 ----------
 
 # **⚙️ Tech Stack**
@@ -318,7 +303,7 @@ stackwise-ai/
     
 -   DuckDB
     
--   Sentence Transformers (embeddings)
+-   Sentence Transformers
     
 
   
@@ -327,6 +312,7 @@ stackwise-ai/
 
 -   PostgreSQL
     
+
 ----------
 
 # **🚀 Getting Started**
@@ -342,37 +328,42 @@ cd StackWise-AI
 
 ----------
 
-## **2️⃣ Backend Setup**
+## **2️⃣ Run with Docker (Recommended)**
+
+```
+docker compose up --build
+```
+
+### **Access**
+
+-   Frontend → http://localhost:5173
+    
+-   Backend → http://localhost:8000/docs
+    
+
+----------
+
+## **3️⃣ Local Setup (Optional)**
+
+  
+
+### **Backend**
 
 ```
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-```
-
-Run:
-
-```
 uvicorn backend.main:app --reload
 ```
 
-👉 http://127.0.0.1:8000/docs
-
-----------
-
-## **3️⃣ Database Setup**
+### **Database**
 
 ```
 CREATE DATABASE stackwise_ai;
-```
-
-```
 psql -d stackwise_ai -f database/schema.sql
 ```
 
-----------
-
-## **4️⃣ Frontend Setup**
+### **Frontend**
 
 ```
 cd frontend
@@ -380,7 +371,33 @@ npm install
 npm run dev
 ```
 
-👉 http://localhost:5173
+----------
+
+# **🔌 API Endpoints**
+
+**Endpoint**
+
+**Description**
+
+/recommend
+
+Stack recommendation
+
+/recommend/natural-language
+
+NL-based recommendation
+
+/semantic-search
+
+Embedding-based search
+
+/analytics/*
+
+Metrics & trends
+
+/ml/evaluation
+
+Model performance
 
 ----------
 
@@ -421,8 +438,6 @@ npm run dev
 GET /ml/evaluation
 ```
 
-Returns:
-
 ```
 {
   "ndcg": 0.82,
@@ -433,7 +448,7 @@ Returns:
 
 ----------
 
-# **📉 Current Limitations**
+# **📉 Limitations**
 
 -   synthetic feedback data
     
@@ -448,13 +463,13 @@ Returns:
 
 -   real user feedback loop
     
--   advanced embeddings (OpenAI / Instructor)
+-   advanced embeddings
     
--   hybrid ranking (rule + ML fusion)
+-   hybrid ranking (rules + ML)
     
--   cloud deployment (Docker + CI/CD)
+-   cloud deployment
     
--   user accounts + saved stacks
+-   authentication + saved stacks
     
 
 ----------
@@ -469,6 +484,8 @@ Returns:
 
 # **📜 License**
 
+  
+
 MIT License
 
 ----------
@@ -479,12 +496,13 @@ MIT License
 
 This project demonstrates:
 
--   **ML system design (ranking + evaluation)**
+-   ML system design (ranking + evaluation)
     
--   **full-stack engineering**
+-   full-stack engineering
     
--   **data pipeline + feedback loop**
+-   containerized architecture
     
--   **explainable AI principles**
+-   explainable AI principles
     
 
+---------- 
