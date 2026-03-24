@@ -30,7 +30,7 @@ export default function SemanticSearchCard() {
     <div className="rounded-2xl border bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <h2 className="text-lg font-semibold">🔎 Semantic Search</h2>
       <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-        Search languages by meaning using embedding similarity.
+        Search by meaning using embedding similarity.
       </p>
 
       <div className="mt-4 flex gap-3">
@@ -62,9 +62,9 @@ export default function SemanticSearchCard() {
               key={item.language}
               className="flex items-center justify-between rounded-xl border p-4 dark:border-gray-700"
             >
-              <span className="font-medium">{item.language}</span>
+              <span className="font-medium capitalize">{item.language}</span>
               <span className="rounded-full bg-violet-100 px-3 py-1 text-sm text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
-                similarity {item.similarity.toFixed(4)}
+                {item.similarity.toFixed(4)}
               </span>
             </div>
           ))}

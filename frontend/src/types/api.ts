@@ -17,22 +17,6 @@ export type SimilarStack = {
   distance: number;
 };
 
-export type RecommendationResponse = {
-  winner: StackRecommendation | null;
-  alternatives: StackRecommendation[];
-  ranked_languages: { language: string; score: number }[];
-  explanation?: string | null;
-  confidence?: number | null;
-  sensitivity?: {
-    base_winner?: string;
-    stability?: number;
-    variations?: SensitivityVariation[];
-  } | null;
-  pareto?: { language: string; score: number; ecosystem: number }[] | null;
-  why_not?: { language: string; reason: string }[] | null;
-  similar_stacks?: SimilarStack[] | null;
-};
-
 export type RecommendationContext = {
   project_type: string;
   team_languages: string[];
@@ -43,6 +27,24 @@ export type RecommendationContext = {
   rapid_schema_changes: boolean;
   needs_cache: boolean;
   prefer_portability: boolean;
+};
+
+export type RecommendationResponse = {
+  winner: StackRecommendation | null;
+  alternatives: StackRecommendation[];
+  ranked_languages: { language: string; score: number }[];
+  explanation?: string | null;
+  explanation_details?: string[] | string | null;
+  confidence?: number | null;
+  sensitivity?: {
+    base_winner?: string;
+    stability?: number;
+    variations?: SensitivityVariation[];
+  } | null;
+  pareto?: { language: string; score: number; ecosystem: number }[] | null;
+  why_not?: { language: string; reason: string }[] | null;
+  similar_stacks?: SimilarStack[] | null;
+  ranking_source?: string;
 };
 
 export type NaturalLanguageRecommendationResponse = {
@@ -100,8 +102,7 @@ export type ProjectTypeDistribution = {
 };
 
 export type MlEvaluationMetrics = {
-  accuracy_at_1: number;
-  precision_at_1: number;
-  ndcg_at_3: number;
-  ndcg_at_5: number;
+  ndcg: number;
+  num_samples: number;
+  num_features: number;
 };

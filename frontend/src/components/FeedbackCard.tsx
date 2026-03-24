@@ -28,9 +28,7 @@ export default function FeedbackCard({
   const [accepted, setAccepted] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (!winner) {
-    return null;
-  }
+  if (!winner) return null;
 
   const safeWinner = winner;
 

@@ -141,7 +141,7 @@ export default function Analytics() {
             </div>
 
             <div className="rounded-2xl bg-violet-500 p-5 text-white shadow transition hover:scale-[1.02] hover:shadow-lg">
-              <p className="text-sm opacity-80">Total Runs</p>
+              <p className="text-sm opacity-80">Recent Runs Loaded</p>
               <h2 className="text-2xl font-bold">{recentRuns.length}</h2>
             </div>
 
@@ -152,22 +152,20 @@ export default function Analytics() {
           </div>
 
           {mlMetrics && (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="rounded-2xl bg-emerald-500 p-5 text-white shadow">
-                <p className="text-sm opacity-80">Accuracy@1</p>
-                <h2 className="text-2xl font-bold">{mlMetrics.accuracy_at_1.toFixed(4)}</h2>
+                <p className="text-sm opacity-80">Mean NDCG</p>
+                <h2 className="text-2xl font-bold">{mlMetrics.ndcg.toFixed(4)}</h2>
               </div>
+
               <div className="rounded-2xl bg-cyan-500 p-5 text-white shadow">
-                <p className="text-sm opacity-80">Precision@1</p>
-                <h2 className="text-2xl font-bold">{mlMetrics.precision_at_1.toFixed(4)}</h2>
+                <p className="text-sm opacity-80">Training Samples</p>
+                <h2 className="text-2xl font-bold">{mlMetrics.num_samples}</h2>
               </div>
+
               <div className="rounded-2xl bg-amber-500 p-5 text-white shadow">
-                <p className="text-sm opacity-80">NDCG@3</p>
-                <h2 className="text-2xl font-bold">{mlMetrics.ndcg_at_3.toFixed(4)}</h2>
-              </div>
-              <div className="rounded-2xl bg-rose-500 p-5 text-white shadow">
-                <p className="text-sm opacity-80">NDCG@5</p>
-                <h2 className="text-2xl font-bold">{mlMetrics.ndcg_at_5.toFixed(4)}</h2>
+                <p className="text-sm opacity-80">ML Features</p>
+                <h2 className="text-2xl font-bold">{mlMetrics.num_features}</h2>
               </div>
             </div>
           )}
@@ -246,7 +244,7 @@ export default function Analytics() {
           <Card>
             <h3 className="mb-3 text-lg font-semibold">📦 Project Type Distribution</h3>
             <p className="mb-4 text-sm text-gray-500 dark:text-gray-300">
-              Shows which kinds of projects are most frequently evaluated.
+              Shows which project types are most frequently evaluated.
             </p>
 
             <div style={{ width: "100%", height: 320 }}>
@@ -288,7 +286,7 @@ export default function Analytics() {
                 <BarChart data={recentRunsChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
                   <XAxis dataKey="id" stroke="#64748b" />
-                  <YAxis domain={[0, 1]} stroke="#64748b" />
+                  <YAxis stroke="#64748b" />
                   <Tooltip
                     formatter={(value) => [
                       typeof value === "number" ? value.toFixed(3) : String(value),

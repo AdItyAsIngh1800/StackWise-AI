@@ -67,6 +67,8 @@ export default function Results() {
   }
 
   const winner = data.winner;
+  const rankingSourceLabel =
+    data.ranking_source === "ml_model" ? "ML-powered ranking" : "Rule-based fallback";
 
   return (
     <motion.div
@@ -82,13 +84,21 @@ export default function Results() {
       </section>
 
       <Card>
-        <h2 className="mb-2 text-lg font-semibold">📌 Summary</h2>
-        <p className="text-gray-600 dark:text-gray-300">
-          For your project, <b>{winner?.language}</b> with{" "}
-          <b>{winner?.backend_framework}</b> is recommended due to strong
-          ecosystem support, compatibility with your constraints, and balanced
-          trade-offs.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="mb-2 text-lg font-semibold">📌 Summary</h2>
+            <p className="text-gray-600 dark:text-gray-300">
+              For your project, <b>{winner?.language}</b> with{" "}
+              <b>{winner?.backend_framework}</b> is recommended due to strong
+              ecosystem support, compatibility with your constraints, and balanced
+              trade-offs.
+            </p>
+          </div>
+
+          <div className="rounded-full bg-violet-100 px-4 py-2 text-sm font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">
+            {rankingSourceLabel}
+          </div>
+        </div>
       </Card>
 
       <div className="rounded-2xl bg-linear-to-r from-green-500 to-emerald-500 p-5 text-white shadow transition hover:scale-[1.01] hover:shadow-lg">
@@ -98,6 +108,9 @@ export default function Results() {
         </p>
         <p className="text-sm opacity-90">
           Database: {winner?.database} | Deployment: {winner?.deployment}
+        </p>
+        <p className="mt-2 text-sm opacity-90">
+          Score: {winner?.score?.toFixed(3)}
         </p>
       </div>
 
@@ -118,6 +131,13 @@ export default function Results() {
       />
 
       <div className="border-t dark:border-gray-700" />
+
+      <Card>
+        <h3 className="mb-3 text-lg font-semibold">🧠 Explanation</h3>
+        <p className="text-gray-600 dark:text-gray-300">
+          {data.explanation ?? "No explanation available."}
+        </p>
+      </Card>
 
       <Card>
         <h3 className="mb-3 text-lg font-semibold">🔍 Sensitivity Analysis</h3>
