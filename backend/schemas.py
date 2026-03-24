@@ -21,6 +21,26 @@ class NaturalLanguageRecommendationRequest(BaseModel):
     query: str
 
 
+class FeedbackRequest(BaseModel):
+    run_id: int | None = None
+    project_type: str
+    expected_scale: str = "medium"
+    low_ops: bool = False
+    prefer_enterprise: bool = False
+    prototype_only: bool = False
+    rapid_schema_changes: bool = False
+    needs_cache: bool = False
+    prefer_portability: bool = False
+    team_languages: list[str] = []
+    recommended_language: str
+    selected_language: str
+
+
+class FeedbackResponse(BaseModel):
+    status: str
+    accepted: bool
+
+
 class StackRecommendation(BaseModel):
     language: str
     score: float

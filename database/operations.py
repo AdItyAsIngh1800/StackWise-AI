@@ -290,3 +290,78 @@ def get_runs_for_scenario(scenario_id: int) -> list[dict[str, Any]]:
             return results
     finally:
         conn.close()
+
+def create_feedback(payload: dict[str, Any]) -> dict[str, Any]:
+    query = """
+    INSERT INTO recommendation_feedback (
+        run_id,
+        project_type,
+        expected_scale,
+        low_ops,
+        prefer_enterprise,
+        prototype_only,
+        rapid_schema_changes,
+        needs_cache,
+        prefer_portability,
+        team_languages,
+        recommended_language,
+        selected_language,
+        accepted
+    )
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    RETURNING id, accepted, created_at;
+    """
+
+    accepted = payload["recommended_language"] == payload["selected_language"]
+
+    conn = get_db_connection()
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                query,
+                (
+                    payload.get("run_id"),
+                    payload["project_type"],
+                    payload["expected_scale"],
+                    payload["low_ops"],
+                    payload["prefer_enterprise"],
+                    payload["prototype_only"],
+                    payload["rapid_schema_changes"],
+                    payload["needs_cache"],
+                    payload["prefer_portability"],
+                    json.dumps(payload["team_languages"]),
+                    payload["recommended_language"],
+                    payload["selected_language"],
+                    accepted,
+                ),
+            )
+
+            row = cur.fetchone()
+            conn.commit()
+
+            # 🔥 IMPORTANT FIX
+            if row is None:
+                return {
+                    "id": None,
+                    "accepted": accepted,
+                    "created_at": None,
+                }
+
+            # handle dict cursor
+            if isinstance(row, dict):
+                return {
+                    "id": row.get("id"),
+                    "accepted": row.get("accepted"),
+                    "created_at": str(row.get("created_at")),
+                }
+
+            # handle tuple cursor
+            return {
+                "id": row[0],
+                "accepted": row[1],
+                "created_at": str(row[2]),
+            }
+
+    finally:
+        conn.close()

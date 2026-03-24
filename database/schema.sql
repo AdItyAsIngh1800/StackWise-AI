@@ -49,3 +49,22 @@ CREATE INDEX idx_runs_scenario_id ON recommendation_runs(scenario_id);
 CREATE INDEX idx_runs_language ON recommendation_runs(winner_language);
 
 CREATE INDEX idx_scenarios_name ON scenarios(scenario_name);
+
+CREATE TABLE IF NOT EXISTS recommendation_feedback (
+    id SERIAL PRIMARY KEY,
+    run_id INTEGER REFERENCES recommendation_runs(id) ON DELETE SET NULL,
+    project_type TEXT,
+    expected_scale TEXT,
+    low_ops BOOLEAN,
+    prefer_enterprise BOOLEAN,
+    prototype_only BOOLEAN,
+    rapid_schema_changes BOOLEAN,
+    needs_cache BOOLEAN,
+    prefer_portability BOOLEAN,
+    team_languages TEXT,
+    recommended_language TEXT,
+    selected_language TEXT,
+    accepted BOOLEAN,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

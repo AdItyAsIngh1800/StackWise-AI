@@ -8,6 +8,8 @@ from backend.schemas import (
     RecommendationResponse,
     NaturalLanguageRecommendationRequest,
     NaturalLanguageRecommendationResponse,
+    FeedbackRequest,
+    FeedbackResponse,
 )
 from database.operations import (
     create_recommendation_run,
@@ -17,6 +19,7 @@ from database.operations import (
     get_scenario_by_id,
     list_recommendation_runs,
     list_scenarios,
+    create_feedback,
 )
 from database.queries import (
     get_avg_confidence,
@@ -26,6 +29,7 @@ from database.queries import (
     get_top_stacks,
 )
 from engine.embeddings import semantic_search
+from engine.ml.evaluate_model import evaluate
 from engine.nl_parser import parse_natural_language_query
 from engine.recommend import recommend_stack
 
@@ -98,10 +102,32 @@ def recommend_from_text(request: NaturalLanguageRecommendationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/feedback", response_model=FeedbackResponse)
+def submit_feedback(request: FeedbackRequest):
+    try:
+        payload = request.model_dump()
+        result = create_feedback(payload)
+
+        return {
+            "status": "ok",
+            "accepted": bool(result["accepted"]),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/semantic-search")
 def semantic_search_api(query: str, top_k: int = 3):
     try:
         return semantic_search(query, top_k=top_k)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/ml/evaluation")
+def ml_evaluation():
+    try:
+        return evaluate()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
