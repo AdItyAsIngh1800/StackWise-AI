@@ -4,27 +4,24 @@ import os
 from pathlib import Path
 
 import psycopg2
-from dotenv import load_dotenv
 from psycopg2.extras import RealDictCursor
+from dotenv import load_dotenv
 
-# Always load .env from project root explicitly
+
+# Load .env ONLY if running locally (not in Docker)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ENV_PATH = PROJECT_ROOT / ".env"
-load_dotenv(dotenv_path=ENV_PATH, override=True)
+
+if ENV_PATH.exists():
+    load_dotenv(dotenv_path=ENV_PATH, override=False)
 
 
 def get_db_connection():
-    host = os.getenv("DB_HOST", "localhost")
-    port = os.getenv("DB_PORT", "5432")
-    dbname = os.getenv("DB_NAME", "stackwise_ai")
-    user = os.getenv("DB_USER", "postgres")
-    password = os.getenv("DB_PASSWORD", "")
-
     return psycopg2.connect(
-        host=host,
-        port=port,
-        dbname=dbname,
-        user=user,
-        password=password,
+        host=os.environ.get("DB_HOST", "localhost"),
+        port=int(os.environ.get("DB_PORT", "5432")),
+        dbname=os.environ.get("DB_NAME", "stackwise_ai"),
+        user=os.environ.get("DB_USER", "postgres"),
+        password=os.environ.get("DB_PASSWORD", ""),
         cursor_factory=RealDictCursor,
     )
