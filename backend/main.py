@@ -119,10 +119,10 @@ def submit_feedback(request: FeedbackRequest):
 @app.get("/semantic-search")
 def semantic_search_api(query: str, top_k: int = 3):
     try:
+        from engine.embeddings import semantic_search
         return semantic_search(query, top_k=top_k)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.get("/ml/evaluation")
 def ml_evaluation():

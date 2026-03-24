@@ -1,35 +1,78 @@
-# -------------------------------
-# Backend (FastAPI)
-# -------------------------------
+# Core Backend
 fastapi
 uvicorn
+starlette
+pydantic
+pydantic_core
 
-# -------------------------------
-# Data Processing & Pipelines
-# -------------------------------
-polars
+# HTTP / Networking
+httpx
+httpcore
+requests
+anyio
+h11
+
+# Data Processing
+numpy
 pandas
+polars
+polars-runtime-32
 pyarrow
-duckdb
 
-# -------------------------------
-# Database (PostgreSQL)
-# -------------------------------
+# ML / AI
+scikit-learn
+scipy
+lightgbm
+torch
+transformers
+sentence-transformers
+tokenizers
+safetensors
+
+# Data Engineering / DB
+duckdb
 psycopg2-binary
 
-# -------------------------------
-# Validation & Config
-# -------------------------------
-pydantic
+# Utilities
 python-dotenv
-
-# -------------------------------
-# Testing
-# -------------------------------
-pytest
-
-sentence-transformers
-
-lightgbm
-scikit-learn
+PyYAML
 joblib
+filelock
+fsspec
+packaging
+typing_extensions
+typing-inspection
+annotated-types
+annotated-doc
+
+# CLI / Formatting / Display
+click
+typer
+rich
+shellingham
+Pygments
+markdown-it-py
+mdurl
+Jinja2
+MarkupSafe
+
+# Math / Misc
+sympy
+mpmath
+networkx
+
+# Testing
+pytest
+pluggy
+iniconfig
+
+# Others
+certifi
+charset-normalizer
+idna
+urllib3
+six
+regex
+tqdm
+setuptools
+hf-xet
