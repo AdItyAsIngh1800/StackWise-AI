@@ -20,6 +20,7 @@ import type {
   RecentRun,
   ConfidenceTrendPoint,
   ProjectTypeDistribution,
+  MlEvaluationMetrics,
 } from "../types/api";
 
 const BAR_COLORS = [
@@ -43,7 +44,7 @@ function AnalyticsSkeleton() {
         ))}
       </div>
 
-      {[1, 2, 3, 4].map((i) => (
+      {[1, 2, 3, 4, 5].map((i) => (
         <div
           key={i}
           className="animate-pulse space-y-3 rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800"
@@ -60,21 +61,21 @@ export default function Analytics() {
   const [topLanguages, setTopLanguages] = useState<TopLanguage[]>([]);
   const [avgConfidence, setAvgConfidence] = useState<number | null>(null);
   const [recentRuns, setRecentRuns] = useState<RecentRun[]>([]);
-  const [confidenceTrend, setConfidenceTrend] = useState<ConfidenceTrendPoint[]>(
-    []
-  );
+  const [confidenceTrend, setConfidenceTrend] = useState<ConfidenceTrendPoint[]>([]);
   const [projectTypes, setProjectTypes] = useState<ProjectTypeDistribution[]>([]);
+  const [mlMetrics, setMlMetrics] = useState<MlEvaluationMetrics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const [langs, conf, runs, trend, types] = await Promise.all([
+        const [langs, conf, runs, trend, types, metrics] = await Promise.all([
           API.get<TopLanguage[]>("/analytics/top-languages"),
           API.get<{ average_confidence: number | null }>("/analytics/confidence"),
           API.get<RecentRun[]>("/analytics/recent-runs"),
           API.get<ConfidenceTrendPoint[]>("/analytics/confidence-trend"),
           API.get<ProjectTypeDistribution[]>("/analytics/project-types"),
+          API.get<MlEvaluationMetrics>("/ml/evaluation"),
         ]);
 
         setTopLanguages(langs.data);
@@ -82,6 +83,9 @@ export default function Analytics() {
         setRecentRuns(runs.data);
         setConfidenceTrend(trend.data);
         setProjectTypes(types.data);
+        setMlMetrics(metrics.data);
+      } catch {
+        setMlMetrics(null);
       } finally {
         setLoading(false);
       }
@@ -146,6 +150,27 @@ export default function Analytics() {
               <h2 className="text-2xl font-bold">{projectTypes.length}</h2>
             </div>
           </div>
+
+          {mlMetrics && (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+              <div className="rounded-2xl bg-emerald-500 p-5 text-white shadow">
+                <p className="text-sm opacity-80">Accuracy@1</p>
+                <h2 className="text-2xl font-bold">{mlMetrics.accuracy_at_1.toFixed(4)}</h2>
+              </div>
+              <div className="rounded-2xl bg-cyan-500 p-5 text-white shadow">
+                <p className="text-sm opacity-80">Precision@1</p>
+                <h2 className="text-2xl font-bold">{mlMetrics.precision_at_1.toFixed(4)}</h2>
+              </div>
+              <div className="rounded-2xl bg-amber-500 p-5 text-white shadow">
+                <p className="text-sm opacity-80">NDCG@3</p>
+                <h2 className="text-2xl font-bold">{mlMetrics.ndcg_at_3.toFixed(4)}</h2>
+              </div>
+              <div className="rounded-2xl bg-rose-500 p-5 text-white shadow">
+                <p className="text-sm opacity-80">NDCG@5</p>
+                <h2 className="text-2xl font-bold">{mlMetrics.ndcg_at_5.toFixed(4)}</h2>
+              </div>
+            </div>
+          )}
 
           <Card>
             <h3 className="mb-3 text-lg font-semibold">🔥 Most Used Languages</h3>

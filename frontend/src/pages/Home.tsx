@@ -4,34 +4,50 @@ import { motion } from "framer-motion";
 
 import API from "../api/client";
 import type {
+  RecommendationContext,
   RecommendationResponse,
   NaturalLanguageRecommendationResponse,
 } from "../types/api";
 
 import Card from "../components/Card";
-import LoadingSpinner from "../components/LoadingSpinner";
-import LanguageSelector from "../components/LanguageSelector";
-import NaturalLanguageBox from "../components/NaturalLanguageBox";
-import ParsedInputCard from "../components/ParsedInputCard";
+import SemanticSearchCard from "../components/SemanticSearchCard";
+
+const LANGUAGES = [
+  "python",
+  "javascript",
+  "typescript",
+  "java",
+  "go",
+  "rust",
+];
 
 export default function Home() {
   const navigate = useNavigate();
 
   const [projectType, setProjectType] = useState("api");
-  const [teamLanguages, setTeamLanguages] = useState<string[]>(["python"]);
-  const [lowOps, setLowOps] = useState(true);
   const [expectedScale, setExpectedScale] = useState("medium");
+  const [lowOps, setLowOps] = useState(false);
+  const [teamLanguages, setTeamLanguages] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [parsedInput, setParsedInput] =
-    useState<NaturalLanguageRecommendationResponse["parsed_input"] | null>(null);
+
+  const [nlQuery, setNlQuery] = useState("");
+
+  function toggleLanguage(lang: string) {
+    setTeamLanguages((prev) =>
+      prev.includes(lang)
+        ? prev.filter((l) => l !== lang)
+        : [...prev, lang]
+    );
+  }
 
   async function submit() {
     setLoading(true);
     setError(null);
 
     try {
-      const payload = {
+      const payload: RecommendationContext = {
         project_type: projectType,
         team_languages: teamLanguages,
         low_ops: lowOps,
@@ -44,151 +60,162 @@ export default function Home() {
       };
 
       const res = await API.post<RecommendationResponse>("/recommend", payload);
-      navigate("/results", { state: res.data });
+
+      navigate("/results", {
+        state: {
+          recommendation: res.data,
+          context: payload,
+        },
+      });
     } catch {
-      setError("Failed to fetch recommendation. Please try again.");
+      setError("Failed to fetch recommendation.");
     } finally {
       setLoading(false);
     }
   }
 
-  function handleNaturalLanguageResult(
-    result: NaturalLanguageRecommendationResponse
-  ) {
-    setParsedInput(result.parsed_input);
-    navigate("/results", { state: result.recommendation });
+  async function submitNL() {
+    if (!nlQuery.trim()) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await API.post<NaturalLanguageRecommendationResponse>(
+        "/recommend/natural-language",
+        { query: nlQuery }
+      );
+
+      navigate("/results", {
+        state: {
+          recommendation: res.data.recommendation,
+          context: res.data.parsed_input,
+        },
+      });
+    } catch {
+      setError("Failed to process natural language input.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
       className="space-y-8"
     >
       <section className="rounded-3xl bg-linear-to-r from-blue-600 via-violet-600 to-fuchsia-600 p-8 text-white shadow-lg">
-        <div className="max-w-3xl space-y-4">
-          <span className="inline-flex rounded-full bg-white/15 px-3 py-1 text-sm backdrop-blur">
-            Decision Intelligence for Tech Stacks
-          </span>
-
-          <h1 className="text-4xl font-bold md:text-5xl">
-            Choose the right stack with confidence
-          </h1>
-
-          <p className="text-white/90">
-            Compare technologies using scoring, trade-offs, and system-level
-            reasoning — not guesswork.
-          </p>
-        </div>
+        <h1 className="text-3xl font-bold">🚀 StackWise-AI</h1>
+        <p className="mt-2 text-white/90">
+          Intelligent, explainable tech stack recommendations
+        </p>
       </section>
 
-      <NaturalLanguageBox onResult={handleNaturalLanguageResult} />
+      <Card>
+        <h2 className="text-lg font-semibold">💬 Natural Language Input</h2>
 
-      {parsedInput && <ParsedInputCard parsed={parsedInput} />}
+        <div className="mt-4 flex gap-3">
+          <input
+            value={nlQuery}
+            onChange={(e) => setNlQuery(e.target.value)}
+            placeholder="e.g. build scalable API with low ops"
+            className="flex-1 rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
+          />
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-2xl bg-blue-50 p-5 shadow-sm dark:bg-blue-950/30">
-          <h3 className="font-semibold">⚡ Fast Decisions</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Get recommendations instantly based on your constraints.
-          </p>
-        </div>
-
-        <div className="rounded-2xl bg-violet-50 p-5 shadow-sm dark:bg-violet-950/30">
-          <h3 className="font-semibold">📊 Explainable</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Understand why a stack is chosen.
-          </p>
-        </div>
-
-        <div className="rounded-2xl bg-fuchsia-50 p-5 shadow-sm dark:bg-fuchsia-950/30">
-          <h3 className="font-semibold">⚖️ Trade-offs</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            Compare alternatives using Pareto analysis.
-          </p>
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card>
-          <label className="mb-2 block font-medium">Project Type</label>
-          <select
-            className="w-full rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
-            value={projectType}
-            onChange={(e) => setProjectType(e.target.value)}
+          <button
+            onClick={submitNL}
+            disabled={loading}
+            className="rounded-xl bg-linear-to-r from-blue-600 to-violet-600 px-4 py-2 text-white shadow hover:scale-[1.02] disabled:opacity-60"
           >
-            <option value="api">API</option>
-            <option value="web">Web</option>
-            <option value="ai-ml">AI/ML</option>
-            <option value="enterprise">Enterprise</option>
-          </select>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Select the primary type of system you are planning to build.
-          </p>
-        </Card>
-
-        <Card>
-          <label className="mb-2 block font-medium">Expected Scale</label>
-          <select
-            className="w-full rounded-xl border p-3 dark:border-gray-700 dark:bg-gray-900"
-            value={expectedScale}
-            onChange={(e) => setExpectedScale(e.target.value)}
-          >
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Small for side projects, medium for standard production systems, high
-            for enterprise or large-scale workloads.
-          </p>
-        </Card>
-
-        <Card>
-          <label className="mb-2 block font-medium">Team Languages</label>
-          <LanguageSelector value={teamLanguages} onChange={setTeamLanguages} />
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Select one or more languages your team is comfortable with.
-          </p>
-        </Card>
-
-        <Card>
-          <label className="flex items-center gap-2 font-medium">
-            <input
-              type="checkbox"
-              checked={lowOps}
-              onChange={(e) => setLowOps(e.target.checked)}
-            />
-            Prefer low-ops / managed setup
-          </label>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
-            Better for faster delivery and reduced infrastructure maintenance.
-          </p>
-        </Card>
-      </div>
-
-      {loading && <LoadingSpinner />}
-
-      {error && (
-        <div className="rounded-xl bg-red-100 p-3 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-          {error}
+            Run
+          </button>
         </div>
-      )}
+      </Card>
 
-      <div className="flex flex-wrap items-center gap-4">
-        <button
-          onClick={submit}
-          disabled={loading}
-          className="rounded-xl bg-linear-to-r from-blue-600 to-violet-600 px-6 py-3 text-white shadow transition hover:scale-[1.02] hover:shadow-lg disabled:opacity-60"
-        >
-          {loading ? "Generating..." : "Get Recommendation"}
-        </button>
+      <SemanticSearchCard />
 
-        <span className="text-sm text-gray-500 dark:text-gray-300">
-          Powered by weighted scoring, evidence signals, confidence, and trade-off analysis.
-        </span>
-      </div>
+      <Card>
+        <h2 className="text-lg font-semibold">⚙️ Manual Configuration</h2>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium">Project Type</label>
+            <select
+              value={projectType}
+              onChange={(e) => setProjectType(e.target.value)}
+              className="mt-1 w-full rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900"
+            >
+              <option value="api">API</option>
+              <option value="web">Web</option>
+              <option value="ai-ml">AI/ML</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Expected Scale</label>
+            <select
+              value={expectedScale}
+              onChange={(e) => setExpectedScale(e.target.value)}
+              className="mt-1 w-full rounded-xl border p-2 dark:border-gray-700 dark:bg-gray-900"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={lowOps}
+            onChange={(e) => setLowOps(e.target.checked)}
+          />
+          <label>Prefer low operations / simple setup</label>
+        </div>
+
+        <div className="mt-6">
+          <label className="text-sm font-medium">Team Languages</label>
+
+          <div className="mt-2 flex flex-wrap gap-2">
+            {LANGUAGES.map((lang) => {
+              const selected = teamLanguages.includes(lang);
+
+              return (
+                <button
+                  key={lang}
+                  onClick={() => toggleLanguage(lang)}
+                  className={`rounded-full px-4 py-2 text-sm transition ${
+                    selected
+                      ? "bg-linear-to-r from-blue-600 to-violet-600 text-white shadow"
+                      : "bg-gray-200 dark:bg-gray-700"
+                  }`}
+                >
+                  {lang}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <button
+            onClick={submit}
+            disabled={loading}
+            className="w-full rounded-xl bg-linear-to-r from-green-500 to-emerald-500 px-5 py-3 text-white shadow transition hover:scale-[1.02] disabled:opacity-60"
+          >
+            {loading ? "Running..." : "Get Recommendation"}
+          </button>
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-xl bg-red-100 p-3 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+            {error}
+          </div>
+        )}
+      </Card>
     </motion.div>
   );
 }

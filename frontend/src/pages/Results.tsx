@@ -8,13 +8,46 @@ import ParetoChart from "../components/ParetoChart";
 import WhyNotList from "../components/WhyNotList";
 import RankingChart from "../components/RankingChart";
 import SimilarStacksCard from "../components/SimilarStacksCard";
-import type { RecommendationResponse } from "../types/api";
+import FeedbackCard from "../components/FeedbackCard";
+import type {
+  RecommendationContext,
+  RecommendationResponse,
+} from "../types/api";
 import Card from "../components/Card";
+
+type ResultsPageState = {
+  recommendation: RecommendationResponse;
+  context: RecommendationContext;
+};
 
 export default function Results() {
   const location = useLocation();
   const navigate = useNavigate();
-  const data = location.state as RecommendationResponse | undefined;
+  const state = location.state as ResultsPageState | RecommendationResponse | undefined;
+
+  const hasWrappedState =
+    state &&
+    typeof state === "object" &&
+    "recommendation" in state &&
+    "context" in state;
+
+  const data: RecommendationResponse | undefined = hasWrappedState
+    ? state.recommendation
+    : (state as RecommendationResponse | undefined);
+
+  const context: RecommendationContext = hasWrappedState
+    ? state.context
+    : {
+        project_type: "api",
+        expected_scale: "medium",
+        low_ops: false,
+        prefer_enterprise: false,
+        prototype_only: false,
+        rapid_schema_changes: false,
+        needs_cache: false,
+        prefer_portability: false,
+        team_languages: [],
+      };
 
   if (!data) {
     return (
@@ -74,10 +107,15 @@ export default function Results() {
       </div>
 
       <RankingChart data={data.ranked_languages ?? []} />
-
       <ParetoChart data={data.pareto ?? []} />
-
       <SimilarStacksCard items={data.similar_stacks} />
+
+      <FeedbackCard
+        winner={data.winner}
+        alternatives={data.alternatives ?? []}
+        context={context}
+        runId={null}
+      />
 
       <div className="border-t dark:border-gray-700" />
 

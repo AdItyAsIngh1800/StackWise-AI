@@ -33,19 +33,46 @@ export type RecommendationResponse = {
   similar_stacks?: SimilarStack[] | null;
 };
 
+export type RecommendationContext = {
+  project_type: string;
+  team_languages: string[];
+  low_ops: boolean;
+  expected_scale: string;
+  prefer_enterprise: boolean;
+  prototype_only: boolean;
+  rapid_schema_changes: boolean;
+  needs_cache: boolean;
+  prefer_portability: boolean;
+};
+
 export type NaturalLanguageRecommendationResponse = {
-  parsed_input: {
-    project_type: string;
-    team_languages: string[];
-    low_ops: boolean;
-    expected_scale: string;
-    prefer_enterprise: boolean;
-    prototype_only: boolean;
-    rapid_schema_changes: boolean;
-    needs_cache: boolean;
-    prefer_portability: boolean;
-  };
+  parsed_input: RecommendationContext;
   recommendation: RecommendationResponse;
+};
+
+export type SemanticSearchResult = {
+  language: string;
+  similarity: number;
+};
+
+export type FeedbackRequest = {
+  run_id: number | null;
+  project_type: string;
+  expected_scale: string;
+  low_ops: boolean;
+  prefer_enterprise: boolean;
+  prototype_only: boolean;
+  rapid_schema_changes: boolean;
+  needs_cache: boolean;
+  prefer_portability: boolean;
+  team_languages: string[];
+  recommended_language: string;
+  selected_language: string;
+};
+
+export type FeedbackResponse = {
+  status: string;
+  accepted: boolean;
 };
 
 export type TopLanguage = {
@@ -70,4 +97,11 @@ export type ConfidenceTrendPoint = {
 export type ProjectTypeDistribution = {
   project_type: string;
   count: number;
+};
+
+export type MlEvaluationMetrics = {
+  accuracy_at_1: number;
+  precision_at_1: number;
+  ndcg_at_3: number;
+  ndcg_at_5: number;
 };
