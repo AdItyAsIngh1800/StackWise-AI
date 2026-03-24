@@ -25,6 +25,7 @@ from database.queries import (
     get_top_languages,
     get_top_stacks,
 )
+from engine.embeddings import semantic_search
 from engine.nl_parser import parse_natural_language_query
 from engine.recommend import recommend_stack
 
@@ -93,6 +94,14 @@ def recommend_from_text(request: NaturalLanguageRecommendationRequest):
             "parsed_input": parsed_request,
             "recommendation": result,
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/semantic-search")
+def semantic_search_api(query: str, top_k: int = 3):
+    try:
+        return semantic_search(query, top_k=top_k)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -27,3 +27,5 @@ python-dotenv
 # Testing
 # -------------------------------
 pytest
+
+sentence-transformers
