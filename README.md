@@ -227,7 +227,7 @@ stackwise-ai/
 ├── frontend/        # React + TypeScript UI
 ├── engine/          # Core logic + ML
 │   ├── ml/          # Training + prediction
-│   ├── similarity/  # Semantic search
+│   ├── confidence.py
 │   └── ...
 ├── evidence/        # Dataset signals
 ├── database/        # PostgreSQL operations
