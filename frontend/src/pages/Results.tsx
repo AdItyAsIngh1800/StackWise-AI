@@ -7,6 +7,7 @@ import SensitivityTable from "../components/SensitivityTable";
 import ParetoChart from "../components/ParetoChart";
 import WhyNotList from "../components/WhyNotList";
 import RankingChart from "../components/RankingChart";
+import SimilarStacksCard from "../components/SimilarStacksCard";
 import type { RecommendationResponse } from "../types/api";
 import Card from "../components/Card";
 
@@ -72,11 +73,11 @@ export default function Results() {
         <ConfidenceBar value={data.confidence ?? 0} />
       </div>
 
-      <div className="border-t dark:border-gray-700" />
-
       <RankingChart data={data.ranked_languages ?? []} />
 
       <ParetoChart data={data.pareto ?? []} />
+
+      <SimilarStacksCard items={data.similar_stacks} />
 
       <div className="border-t dark:border-gray-700" />
 

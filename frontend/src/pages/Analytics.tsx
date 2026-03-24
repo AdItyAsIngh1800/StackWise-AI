@@ -15,37 +15,12 @@ import {
 
 import API from "../api/client";
 import Card from "../components/Card";
-
-type TopLanguage = {
-  language?: string;
-  winner_language?: string;
-  count: number;
-};
-
-type RecentRun = {
-  id: number;
-  project_type: string;
-  winner_language: string;
-  score: number;
-  created_at: string;
-};
-
-type ConfidenceTrendPoint = {
-  date: string;
-  avg_confidence: number | null;
-};
-
-const LANGUAGE_ICONS: Record<string, string> = {
-  python: "🐍",
-  javascript: "⚡",
-  typescript: "🟦",
-  java: "☕",
-  go: "🐹",
-  "c++": "💠",
-  rust: "🦀",
-  "c#": "🎯",
-  php: "🐘",
-};
+import type {
+  TopLanguage,
+  RecentRun,
+  ConfidenceTrendPoint,
+  ProjectTypeDistribution,
+} from "../types/api";
 
 const BAR_COLORS = [
   "#2563eb",
@@ -55,15 +30,6 @@ const BAR_COLORS = [
   "#f59e0b",
   "#ef4444",
 ];
-
-function getLanguageLabel(item: TopLanguage): string {
-  return item.language ?? item.winner_language ?? "Unknown";
-}
-
-function getLanguageDisplay(name: string): string {
-  const icon = LANGUAGE_ICONS[name.toLowerCase()] ?? "🔹";
-  return `${icon} ${name}`;
-}
 
 function AnalyticsSkeleton() {
   return (
@@ -77,7 +43,7 @@ function AnalyticsSkeleton() {
         ))}
       </div>
 
-      {[1, 2, 3].map((i) => (
+      {[1, 2, 3, 4].map((i) => (
         <div
           key={i}
           className="animate-pulse space-y-3 rounded-2xl bg-white p-6 shadow-sm dark:bg-gray-800"
@@ -97,22 +63,25 @@ export default function Analytics() {
   const [confidenceTrend, setConfidenceTrend] = useState<ConfidenceTrendPoint[]>(
     []
   );
+  const [projectTypes, setProjectTypes] = useState<ProjectTypeDistribution[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const [langs, conf, runs, trend] = await Promise.all([
+        const [langs, conf, runs, trend, types] = await Promise.all([
           API.get<TopLanguage[]>("/analytics/top-languages"),
           API.get<{ average_confidence: number | null }>("/analytics/confidence"),
           API.get<RecentRun[]>("/analytics/recent-runs"),
           API.get<ConfidenceTrendPoint[]>("/analytics/confidence-trend"),
+          API.get<ProjectTypeDistribution[]>("/analytics/project-types"),
         ]);
 
         setTopLanguages(langs.data);
         setAvgConfidence(conf.data.average_confidence);
         setRecentRuns(runs.data);
         setConfidenceTrend(trend.data);
+        setProjectTypes(types.data);
       } finally {
         setLoading(false);
       }
@@ -122,7 +91,7 @@ export default function Analytics() {
   }, []);
 
   const topLanguagesChartData = topLanguages.map((item) => ({
-    language: getLanguageLabel(item),
+    language: item.language ?? item.winner_language ?? "Unknown",
     count: item.count,
   }));
 
@@ -135,6 +104,11 @@ export default function Analytics() {
   const confidenceTrendChartData = confidenceTrend.map((point) => ({
     date: point.date,
     avg_confidence: point.avg_confidence ?? 0,
+  }));
+
+  const projectTypeChartData = projectTypes.map((item) => ({
+    project_type: item.project_type,
+    count: item.count,
   }));
 
   return (
@@ -168,12 +142,8 @@ export default function Analytics() {
             </div>
 
             <div className="rounded-2xl bg-fuchsia-500 p-5 text-white shadow transition hover:scale-[1.02] hover:shadow-lg">
-              <p className="text-sm opacity-80">Top Language</p>
-              <h2 className="text-2xl font-bold">
-                {topLanguages.length > 0
-                  ? getLanguageDisplay(getLanguageLabel(topLanguages[0]))
-                  : "-"}
-              </h2>
+              <p className="text-sm opacity-80">Tracked Project Types</p>
+              <h2 className="text-2xl font-bold">{projectTypes.length}</h2>
             </div>
           </div>
 
@@ -183,46 +153,32 @@ export default function Analytics() {
               Shows how often each language was selected across recommendations.
             </p>
 
-            {topLanguagesChartData.length > 0 ? (
-              <div style={{ width: "100%", height: 320 }}>
-                <ResponsiveContainer>
-                  <BarChart data={topLanguagesChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
-                    <XAxis dataKey="language" stroke="#64748b" />
-                    <YAxis stroke="#64748b" />
-                    <Tooltip
-                      cursor={{ fill: "rgba(99, 102, 241, 0.1)" }}
-                      formatter={(value) => [String(value), "Count"]}
-                      contentStyle={{
-                        backgroundColor: "#111827",
-                        border: "none",
-                        borderRadius: "12px",
-                        color: "#ffffff",
-                      }}
-                    />
-                    <Bar
-                      dataKey="count"
-                      radius={[8, 8, 0, 0]}
-                      animationDuration={600}
-                    >
-                      {topLanguagesChartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${entry.language}`}
-                          fill={BAR_COLORS[index % BAR_COLORS.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="py-10 text-center text-gray-500 dark:text-gray-300">
-                <p className="text-lg">No analytics data yet</p>
-                <p className="text-sm">
-                  Run a few recommendations to see insights here.
-                </p>
-              </div>
-            )}
+            <div style={{ width: "100%", height: 320 }}>
+              <ResponsiveContainer>
+                <BarChart data={topLanguagesChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
+                  <XAxis dataKey="language" stroke="#64748b" />
+                  <YAxis stroke="#64748b" />
+                  <Tooltip
+                    formatter={(value) => [String(value), "Count"]}
+                    contentStyle={{
+                      backgroundColor: "#111827",
+                      border: "none",
+                      borderRadius: "12px",
+                      color: "#ffffff",
+                    }}
+                  />
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                    {topLanguagesChartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${entry.language}`}
+                        fill={BAR_COLORS[index % BAR_COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
 
           <Card>
@@ -231,48 +187,69 @@ export default function Analytics() {
               Tracks how average confidence changes across saved recommendation runs.
             </p>
 
-            {confidenceTrendChartData.length > 0 ? (
-              <div style={{ width: "100%", height: 320 }}>
-                <ResponsiveContainer>
-                  <LineChart data={confidenceTrendChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
-                    <XAxis dataKey="date" stroke="#64748b" />
-                    <YAxis domain={[0, 1]} stroke="#64748b" />
-                    <Tooltip
-                      cursor={{ stroke: "#7c3aed", strokeWidth: 1 }}
-                      formatter={(value) => [
-                        typeof value === "number"
-                          ? value.toFixed(3)
-                          : String(value),
-                        "Avg Confidence",
-                      ]}
-                      contentStyle={{
-                        backgroundColor: "#111827",
-                        border: "none",
-                        borderRadius: "12px",
-                        color: "#ffffff",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="avg_confidence"
-                      stroke="#7c3aed"
-                      strokeWidth={3}
-                      dot={{ r: 5 }}
-                      activeDot={{ r: 7 }}
-                      animationDuration={700}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="py-10 text-center text-gray-500 dark:text-gray-300">
-                <p className="text-lg">No confidence trend data yet</p>
-                <p className="text-sm">
-                  More recommendation runs are needed to show trends.
-                </p>
-              </div>
-            )}
+            <div style={{ width: "100%", height: 320 }}>
+              <ResponsiveContainer>
+                <LineChart data={confidenceTrendChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
+                  <XAxis dataKey="date" stroke="#64748b" />
+                  <YAxis domain={[0, 1]} stroke="#64748b" />
+                  <Tooltip
+                    formatter={(value) => [
+                      typeof value === "number" ? value.toFixed(3) : String(value),
+                      "Avg Confidence",
+                    ]}
+                    contentStyle={{
+                      backgroundColor: "#111827",
+                      border: "none",
+                      borderRadius: "12px",
+                      color: "#ffffff",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="avg_confidence"
+                    stroke="#7c3aed"
+                    strokeWidth={3}
+                    dot={{ r: 5 }}
+                    activeDot={{ r: 7 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card>
+            <h3 className="mb-3 text-lg font-semibold">📦 Project Type Distribution</h3>
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-300">
+              Shows which kinds of projects are most frequently evaluated.
+            </p>
+
+            <div style={{ width: "100%", height: 320 }}>
+              <ResponsiveContainer>
+                <BarChart data={projectTypeChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
+                  <XAxis dataKey="project_type" stroke="#64748b" />
+                  <YAxis stroke="#64748b" />
+                  <Tooltip
+                    formatter={(value) => [String(value), "Count"]}
+                    contentStyle={{
+                      backgroundColor: "#111827",
+                      border: "none",
+                      borderRadius: "12px",
+                      color: "#ffffff",
+                    }}
+                  />
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                    {projectTypeChartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${entry.project_type}`}
+                        fill={BAR_COLORS[index % BAR_COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
 
           <Card>
@@ -281,60 +258,39 @@ export default function Analytics() {
               Compares scores of the most recent recommendation runs.
             </p>
 
-            {recentRunsChartData.length > 0 ? (
-              <div style={{ width: "100%", height: 320 }}>
-                <ResponsiveContainer>
-                  <BarChart data={recentRunsChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
-                    <XAxis dataKey="id" stroke="#64748b" />
-                    <YAxis domain={[0, 1]} stroke="#64748b" />
-                    <Tooltip
-                      cursor={{ fill: "rgba(16, 185, 129, 0.1)" }}
-                      formatter={(value, name) => {
-                        if (name === "score") {
-                          return [
-                            typeof value === "number"
-                              ? value.toFixed(3)
-                              : String(value),
-                            "Score",
-                          ];
-                        }
-                        return [String(value), String(name)];
-                      }}
-                      labelFormatter={(label, payload) => {
-                        const lang = payload?.[0]?.payload?.winner_language;
-                        return `Run ${label}${lang ? ` • ${lang}` : ""}`;
-                      }}
-                      contentStyle={{
-                        backgroundColor: "#111827",
-                        border: "none",
-                        borderRadius: "12px",
-                        color: "#ffffff",
-                      }}
-                    />
-                    <Bar
-                      dataKey="score"
-                      radius={[8, 8, 0, 0]}
-                      animationDuration={600}
-                    >
-                      {recentRunsChartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${entry.id}`}
-                          fill={BAR_COLORS[index % BAR_COLORS.length]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="py-10 text-center text-gray-500 dark:text-gray-300">
-                <p className="text-lg">No runs yet</p>
-                <p className="text-sm">
-                  Generate recommendations to populate this section.
-                </p>
-              </div>
-            )}
+            <div style={{ width: "100%", height: 320 }}>
+              <ResponsiveContainer>
+                <BarChart data={recentRunsChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
+                  <XAxis dataKey="id" stroke="#64748b" />
+                  <YAxis domain={[0, 1]} stroke="#64748b" />
+                  <Tooltip
+                    formatter={(value) => [
+                      typeof value === "number" ? value.toFixed(3) : String(value),
+                      "Score",
+                    ]}
+                    labelFormatter={(label, payload) => {
+                      const lang = payload?.[0]?.payload?.winner_language;
+                      return `Run ${label}${lang ? ` • ${lang}` : ""}`;
+                    }}
+                    contentStyle={{
+                      backgroundColor: "#111827",
+                      border: "none",
+                      borderRadius: "12px",
+                      color: "#ffffff",
+                    }}
+                  />
+                  <Bar dataKey="score" radius={[8, 8, 0, 0]}>
+                    {recentRunsChartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${entry.id}`}
+                        fill={BAR_COLORS[index % BAR_COLORS.length]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
         </>
       )}

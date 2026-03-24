@@ -3,11 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import API from "../api/client";
-import type { RecommendationResponse } from "../types/api";
+import type {
+  RecommendationResponse,
+  NaturalLanguageRecommendationResponse,
+} from "../types/api";
 
 import Card from "../components/Card";
 import LoadingSpinner from "../components/LoadingSpinner";
 import LanguageSelector from "../components/LanguageSelector";
+import NaturalLanguageBox from "../components/NaturalLanguageBox";
+import ParsedInputCard from "../components/ParsedInputCard";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -18,6 +23,8 @@ export default function Home() {
   const [expectedScale, setExpectedScale] = useState("medium");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [parsedInput, setParsedInput] =
+    useState<NaturalLanguageRecommendationResponse["parsed_input"] | null>(null);
 
   async function submit() {
     setLoading(true);
@@ -45,6 +52,13 @@ export default function Home() {
     }
   }
 
+  function handleNaturalLanguageResult(
+    result: NaturalLanguageRecommendationResponse
+  ) {
+    setParsedInput(result.parsed_input);
+    navigate("/results", { state: result.recommendation });
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -68,6 +82,10 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      <NaturalLanguageBox onResult={handleNaturalLanguageResult} />
+
+      {parsedInput && <ParsedInputCard parsed={parsedInput} />}
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="rounded-2xl bg-blue-50 p-5 shadow-sm dark:bg-blue-950/30">
