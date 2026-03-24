@@ -11,6 +11,14 @@ from evidence.language_signals import get_language_signal
 CANDIDATES = ["python", "javascript", "typescript", "java", "go", "rust"]
 
 
+def _project_type_feature(project_type: str) -> int:
+    return 1 if project_type == "api" else 0
+
+
+def _scale_feature(expected_scale: str) -> int:
+    return 1 if expected_scale == "high" else 0
+
+
 def load_feedback_rows() -> list[dict]:
     query = """
     SELECT
@@ -64,51 +72,45 @@ def load_feedback_rows() -> list[dict]:
         conn.close()
 
 
-def _parse_team_languages(raw: object) -> list[str]:
-    if isinstance(raw, str):
-        try:
-            parsed = json.loads(raw)
-            if isinstance(parsed, list):
-                return [str(x).strip().lower() for x in parsed]
-            return []
-        except json.JSONDecodeError:
-            return []
-
-    if isinstance(raw, list):
-        return [str(x).strip().lower() for x in raw]
-
-    return []
-
-
 def build_training_dataframe() -> pd.DataFrame:
     feedback_rows = load_feedback_rows()
     output_rows: list[dict] = []
 
     for feedback in feedback_rows:
-        query_id = int(feedback["id"])
-        project_type = str(feedback["project_type"]).strip().lower()
-        expected_scale = str(feedback["expected_scale"]).strip().lower()
-        recommended_language = str(feedback["recommended_language"]).strip().lower()
-        selected_language = str(feedback["selected_language"]).strip().lower()
-        team_languages = _parse_team_languages(feedback["team_languages"])
+        query_id = feedback["id"]
+        selected_language = feedback["selected_language"]
+        recommended_language = feedback["recommended_language"]
+
+        team_languages_raw = feedback["team_languages"]
+        if isinstance(team_languages_raw, str):
+            try:
+                team_languages = json.loads(team_languages_raw)
+            except json.JSONDecodeError:
+                team_languages = []
+        else:
+            team_languages = team_languages_raw or []
 
         for language in CANDIDATES:
             signals = get_language_signal(language)
 
+            # ✅ Better label (graded relevance)
+            if language == selected_language:
+                label = 3
+            elif language == recommended_language:
+                label = 2
+            elif language in team_languages:
+                label = 1
+            else:
+                label = 0
+
             output_rows.append(
                 {
                     "query_id": query_id,
+                    "language": language,
 
-                    # project type one-hot
-                    "project_type_api": int(project_type == "api"),
-                    "project_type_web": int(project_type == "web"),
+                    "project_type_api": _project_type_feature(feedback["project_type"]),
+                    "expected_scale_high": _scale_feature(feedback["expected_scale"]),
 
-                    # expected scale one-hot
-                    "expected_scale_low": int(expected_scale == "low"),
-                    "expected_scale_medium": int(expected_scale == "medium"),
-                    "expected_scale_high": int(expected_scale == "high"),
-
-                    # project constraints
                     "low_ops": int(bool(feedback["low_ops"])),
                     "prefer_enterprise": int(bool(feedback["prefer_enterprise"])),
                     "prototype_only": int(bool(feedback["prototype_only"])),
@@ -116,43 +118,23 @@ def build_training_dataframe() -> pd.DataFrame:
                     "needs_cache": int(bool(feedback["needs_cache"])),
                     "prefer_portability": int(bool(feedback["prefer_portability"])),
 
-                    # candidate identity
-                    "candidate_python": int(language == "python"),
-                    "candidate_javascript": int(language == "javascript"),
-                    "candidate_typescript": int(language == "typescript"),
-                    "candidate_java": int(language == "java"),
-                    "candidate_go": int(language == "go"),
-                    "candidate_rust": int(language == "rust"),
+                    "team_has_language": int(language in team_languages),
 
-                    # team language context
-                    "team_knows_python": int("python" in team_languages),
-                    "team_knows_javascript": int("javascript" in team_languages),
-                    "team_knows_typescript": int("typescript" in team_languages),
-                    "team_knows_java": int("java" in team_languages),
-                    "team_knows_go": int("go" in team_languages),
-                    "team_knows_rust": int("rust" in team_languages),
+                    # 🔥 New engineered features
+                    "matches_team_pref": int(language in team_languages),
+                    "low_ops_fit": int(language in ["python", "go"]),
+                    "enterprise_fit": int(language in ["java"]),
+                    "performance_fit": int(language in ["go", "rust"]),
 
-                    # direct compatibility
-                    "team_has_candidate_language": int(language in team_languages),
+                    "ecosystem": float(signals["ecosystem"]),
+                    "activity": float(signals["activity"]),
+                    "popularity": float(signals["popularity"]),
 
-                    # candidate evidence
-                    "ecosystem": float(signals.get("ecosystem", 0.0)),
-                    "activity": float(signals.get("activity", 0.0)),
-                    "popularity": float(signals.get("popularity", 0.0)),
-
-                    # rules-engine hint
-                    "is_recommended_language": int(language == recommended_language),
-
-                    # ranking relevance
-                    "label": int(language == selected_language),
+                    "label": label,
                 }
             )
 
-    df = pd.DataFrame(output_rows)
-
-    # Keep rows sorted by query so group sizes line up with row order.
-    df = df.sort_values(["query_id"]).reset_index(drop=True)
-    return df
+    return pd.DataFrame(output_rows)
 
 
 if __name__ == "__main__":

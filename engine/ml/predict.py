@@ -1,45 +1,95 @@
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List
 
 import joblib
-import numpy as np
 import pandas as pd
 
-from engine.ml.features import build_features
+from evidence.language_signals import get_language_signal
 
-MODEL_PATH = Path("engine/ml/model.pkl")
+MODEL_PATH = "engine/ml/model.pkl"
+
+_model = None
 
 
 def load_model():
-    if not MODEL_PATH.exists():
-        return None
-    return joblib.load(MODEL_PATH)
+    global _model
+    if _model is None:
+        _model = joblib.load(MODEL_PATH)
+    return _model
 
 
-def rank_with_model(context: dict[str, Any], candidates: list[str]) -> list[dict]:
+def build_feature_row(language: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    signals = get_language_signal(language)
+    team_languages = context.get("team_languages", [])
+
+    return {
+        "project_type_api": int(context.get("project_type") == "api"),
+        "expected_scale_high": int(context.get("expected_scale") == "high"),
+
+        "low_ops": int(context.get("low_ops", False)),
+        "prefer_enterprise": int(context.get("prefer_enterprise", False)),
+        "prototype_only": int(context.get("prototype_only", False)),
+        "rapid_schema_changes": int(context.get("rapid_schema_changes", False)),
+        "needs_cache": int(context.get("needs_cache", False)),
+        "prefer_portability": int(context.get("prefer_portability", False)),
+
+        "team_has_language": int(language in team_languages),
+
+        # engineered features
+        "matches_team_pref": int(language in team_languages),
+        "low_ops_fit": int(language in ["python", "go"]),
+        "enterprise_fit": int(language in ["java"]),
+        "performance_fit": int(language in ["go", "rust"]),
+
+        # signals
+        "ecosystem": float(signals.get("ecosystem", 0.5)),
+        "activity": float(signals.get("activity", 0.5)),
+        "popularity": float(signals.get("popularity", 0.5)),
+    }
+
+
+def rank_with_model(context: Dict[str, Any], candidates: List[str]) -> List[Dict[str, Any]]:
     model = load_model()
-    if model is None:
-        raise FileNotFoundError(f"Model not found at {MODEL_PATH}")
 
-    feature_rows = [build_features(context, language) for language in candidates]
-    X = pd.DataFrame(feature_rows)
+    rows = []
+    for language in candidates:
+        row = build_feature_row(language, context)
+        row["language"] = language
+        rows.append(row)
 
-    # Keep inference column order aligned with training.
-    if hasattr(model, "feature_name_"):
-        X = X.reindex(columns=list(model.feature_name_), fill_value=0)
+    df = pd.DataFrame(rows)
 
-    scores = np.asarray(model.predict(X)).ravel()
+    feature_columns = [
+        "project_type_api",
+        "expected_scale_high",
+        "low_ops",
+        "prefer_enterprise",
+        "prototype_only",
+        "rapid_schema_changes",
+        "needs_cache",
+        "prefer_portability",
+        "team_has_language",
+        "matches_team_pref",
+        "low_ops_fit",
+        "enterprise_fit",
+        "performance_fit",
+        "ecosystem",
+        "activity",
+        "popularity",
+    ]
 
-    results: list[dict] = []
+    scores = model.predict(df[feature_columns])
+
+    ranked = []
     for i, language in enumerate(candidates):
-        results.append(
+        ranked.append(
             {
                 "language": language,
-                "score": float(scores[i]),
+                "score": float(scores[i]),  # important: keep "score" key
             }
         )
 
-    results.sort(key=lambda item: item["score"], reverse=True)
-    return results
+    ranked.sort(key=lambda x: x["score"], reverse=True)
+
+    return ranked

@@ -111,6 +111,10 @@ def build_explanation(
         reasons.append("backend suitability")
     elif project_type == "web":
         reasons.append("web application fit")
+    elif project_type == "ai-ml":
+        reasons.append("AI/ML workflow fit")
+    elif project_type == "enterprise":
+        reasons.append("enterprise system fit")
     else:
         reasons.append("overall project fit")
 
@@ -144,7 +148,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
     try:
         ranked = rank_with_model(context, CANDIDATES)
         ranking_source = "ml_model"
-    except FileNotFoundError:
+    except Exception:
         ranked = rank_languages(CANDIDATES, context)
         ranking_source = "rules_fallback"
 
