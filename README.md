@@ -195,28 +195,38 @@ Identifies optimal trade-offs between:
 
 ```mermaid
 flowchart TD
-
-    A[User<br>React UI] --> B[FastAPI Backend]
+    A[User<br/>React UI] --> B[FastAPI Backend]
 
     B --> C[Recommendation Engine]
 
     C --> C1[Rule-based Candidate Generation]
-    C --> C2[ML Ranking (LightGBM)]
+    C --> C2[ML Ranking<br/>LightGBM LambdaRank]
     C --> C3[Confidence Calculation]
     C --> C4[Sensitivity Analysis]
     C --> C5[Pareto Optimization]
+    C --> C6[Explanation Builder]
 
-    C --> D[Semantic Search<br>(Embeddings)]
+    B --> D[Semantic Search]
+    D --> D1[Sentence Transformers]
+    D --> D2[Embedding Similarity]
 
     C --> E[Evidence Layer]
     E --> E1[Language Signals]
     E --> E2[Catalog Config]
+    E --> E3[Processed Data]
 
-    B --> F[(PostgreSQL<br>Feedback + Runs)]
+    B --> F[(PostgreSQL)]
+    F --> F1[Recommendation Runs]
+    F --> F2[Feedback Storage]
+    F --> F3[Scenarios]
 
-    F --> G[Training Data Pipeline]
-    G --> H[Model Training]
+    F2 --> G[Training Data Pipeline]
+    G --> H[LightGBM Model Training]
+    H --> I[Model Artifact]
+    I --> C2
+
 ```
+
 ----------
 
 # **📂 Project Structure**
