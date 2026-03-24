@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from engine.confidence import compute_confidence
+from engine.explain import explain_top_choice
 from engine.ml.predict import rank_with_model
 from engine.pareto import compute_pareto_frontier
 from engine.scoring import rank_languages
@@ -153,6 +154,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
     alternatives = recommendations[1:]
 
     explanation = build_explanation(winner, context)
+    explanation_details = explain_top_choice(ranked, context)
     confidence = compute_confidence(ranked, context)
     sensitivity = run_sensitivity_analysis(context, CANDIDATES)
     pareto = compute_pareto_frontier(ranked)
@@ -171,6 +173,7 @@ def recommend_stack(context: dict[str, Any]) -> dict[str, Any]:
         "alternatives": alternatives,
         "ranked_languages": ranked,
         "explanation": explanation,
+        "explanation_details": explanation_details,
         "confidence": confidence,
         "sensitivity": sensitivity,
         "pareto": pareto,
