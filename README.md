@@ -1,20 +1,21 @@
 
 
+
+
 # **🚀 StackWise AI**
 
   
 
-### **Explainable Tech Stack Decision Support System**
-
+### **Explainable + ML-Powered Tech Stack Decision System**
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white"/>
   <img src="https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=black"/>
   <img src="https://img.shields.io/badge/TypeScript-UI-3178C6?logo=typescript&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Vite-Build-646CFF?logo=vite&logoColor=white"/>
-  <img src="https://img.shields.io/badge/TailwindCSS-Styling-06B6D4?logo=tailwindcss&logoColor=white"/>
   <img src="https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql&logoColor=white"/>
+  <img src="https://img.shields.io/badge/LightGBM-ML%20Ranking-orange"/>
+  <img src="https://img.shields.io/badge/Semantic%20Search-Embeddings-purple"/>
   <img src="https://img.shields.io/badge/Tests-Pytest-brightgreen"/>
   <img src="https://img.shields.io/badge/License-MIT-yellow"/>
   <img src="https://img.shields.io/badge/Status-Production--Ready-success"/>
@@ -28,45 +29,41 @@
 
   
 
-**StackWise AI**  is an  **explainable decision-support system**  that helps developers and teams choose the most suitable tech stack for their projects.
+**StackWise AI**  is an  **intelligent, explainable decision-support system**  that helps developers choose the optimal tech stack for their projects.
 
   
 
-It uses:
+Unlike typical recommendation tools, it combines:
 
--   constraint-based filtering
+-   rule-based reasoning
     
--   weighted multi-criteria scoring
+-   ML-based ranking (LightGBM)
     
--   confidence estimation
+-   semantic search (embeddings)
     
--   sensitivity analysis
-    
--   Pareto trade-off evaluation
+-   explainability + trade-off analysis
     
 
   
 
-Built as a **modern full-stack application** with:
-
--   FastAPI backend
-    
--   React + TypeScript frontend
-    
--   PostgreSQL database
-    
+👉 Result: **transparent, data-driven stack decisions instead of guesswork**
 
 ----------
 
-# **⚠️ Important Note**
+# **🔥 Key Highlights**
 
-  
-
-This project uses a **rule-based scoring engine combined with dataset-derived signals**.
-
-  
-
-👉 It is  **not a machine learning model yet**, but is designed to evolve into one (XGBoost / LightGBM ranking planned).
+-   🧠 **ML-powered ranking (LightGBM LambdaRank)**
+    
+-   🔎 **Semantic search using embeddings**
+    
+-   📊 **Explainable recommendations**
+    
+-   🔁 **Feedback-driven learning loop**
+    
+-   📈 **Analytics dashboard (NDCG, trends)**
+    
+-   ⚖️ **Pareto trade-off optimization**
+    
 
 ----------
 
@@ -74,130 +71,144 @@ This project uses a **rule-based scoring engine combined with dataset-derived si
 
   
 
-Tech stack selection is often based on intuition, trends, or limited experience.
+Choosing a tech stack is often:
+
+-   intuition-based
+    
+-   trend-driven
+    
+-   inconsistent across teams
+    
 
   
 
 This leads to:
 
--   poor scalability decisions
+-   scalability issues
     
 -   unnecessary complexity
     
--   inconsistent system design
-    
-
-  
-
-StackWise AI introduces a **structured, explainable approach** to:
-
--   compare multiple stack options
-    
--   evaluate trade-offs
-    
--   justify decisions transparently
+-   poor architectural decisions
     
 
 ----------
 
-# **🧠 Key Features**
+👉 **StackWise AI solves this by turning stack selection into a structured, explainable, and learnable system.**
+
+----------
+
+# **🧠 Core Features**
 
   
 
-## **🔹 Tech Stack Recommendation**
+## **🔹 1. ML-Based Recommendation Engine**
 
-  
-
-Suggests:
-
--   programming language
+-   Uses **LightGBM ranking model**
     
--   backend framework
+-   Learns from feedback data
     
--   database
-    
--   deployment strategy
+-   Optimizes ranking using  **NDCG**
     
 
 ----------
 
-## **🔹 Constraint-Based Filtering**
+## **🔹 2. Explainable Decision Logic**
 
   
 
-Filters out invalid stacks based on:
+Each recommendation includes:
 
--   project requirements
+-   confidence score
     
--   scalability constraints
+-   explanation
     
--   operational preferences
+-   trade-offs
+    
+-   alternative options
     
 
 ----------
 
-## **🔹 Weighted Scoring Engine**
+## **🔹 3. Constraint-Based Filtering**
 
   
 
-Scores each option using:
+Filters stacks based on:
 
--   team familiarity
-    
--   ecosystem strength
-    
--   scalability fit
+-   scalability needs
     
 -   operational complexity
     
-
-----------
-
-## **🔹 Confidence Score**
-
-  
-
-Quantifies reliability of recommendation using:
-
--   score separation
-    
--   evidence strength
-    
--   alignment with inputs
+-   team expertise
     
 
 ----------
 
-## **🔹 Sensitivity Analysis**
+## **🔹 4. Semantic Search**
 
   
 
-Answers:
+Search using natural language:
 
-  
+```
+"fast backend for scalable systems"
+```
 
-> “How stable is this decision if priorities change?”
+Returns similar stack options using embeddings.
 
 ----------
 
-## **🔹 Pareto Frontier**
+## **🔹 5. Sensitivity Analysis**
 
   
 
-Highlights  **non-dominated options**  to visualize trade-offs:
+Evaluates:
 
--   performance vs simplicity
+  
+
+> “How stable is this recommendation if inputs change?”
+
+----------
+
+## **🔹 6. Pareto Frontier**
+
+  
+
+Identifies optimal trade-offs between:
+
+-   performance
     
--   scalability vs ease-of-use
+-   ecosystem
+    
+-   simplicity
     
 
 ----------
 
-## **🔹 Scenario Logging (PostgreSQL)**
+## **🔹 7. Feedback Learning Loop**
 
--   stores evaluation history
+-   user feedback stored in PostgreSQL
     
--   enables comparison of past decisions
+-   training dataset generated
+    
+-   ML model retrained
+    
+
+----------
+
+## **🔹 8. Analytics Dashboard**
+
+  
+
+Tracks:
+
+-   recommendation trends
+    
+-   confidence scores
+    
+-   ML performance (NDCG)
+    
+-   usage patterns
     
 
 ----------
@@ -211,17 +222,22 @@ flowchart TD
 
     B --> C[Recommendation Engine]
 
-    C --> C1[Constraint Filtering]
-    C --> C2[Weighted Scoring]
+    C --> C1[Rule-based Candidate Generation]
+    C --> C2[ML Ranking (LightGBM)]
     C --> C3[Confidence Calculation]
     C --> C4[Sensitivity Analysis]
     C --> C5[Pareto Optimization]
 
-    C --> D[Evidence Layer]
-    D --> D1[Language Signals]
-    D --> D2[Catalog Mappings]
+    C --> D[Semantic Search<br>(Embeddings)]
 
-    B --> E[(PostgreSQL<br>Scenario Logging)]
+    C --> E[Evidence Layer]
+    E --> E1[Language Signals]
+    E --> E2[Catalog Config]
+
+    B --> F[(PostgreSQL<br>Feedback + Runs)]
+
+    F --> G[Training Data Pipeline]
+    G --> H[Model Training]
 ```
 
 ----------
@@ -230,15 +246,18 @@ flowchart TD
 
 ```
 stackwise-ai/
-├── backend/        # FastAPI backend
-├── frontend/       # React frontend
-├── engine/         # Recommendation logic
-├── evidence/       # Dataset signals
-├── database/       # PostgreSQL integration
-├── catalog/        # Stack mappings (YAML)
-├── pipelines/      # Data processing
-├── data/           # Processed datasets
-├── tests/          # Unit tests
+├── backend/         # FastAPI API layer
+├── frontend/        # React + TS UI
+├── engine/
+│   ├── ml/          # ML training + prediction
+│   ├── similarity/  # semantic search
+│   ├── scoring/     # rule-based logic
+│   └── ...
+├── evidence/        # dataset signals
+├── database/        # PostgreSQL ops
+├── pipelines/       # data + training pipelines
+├── data/            # datasets
+├── tests/           # API tests
 ```
 
 ----------
@@ -247,21 +266,14 @@ stackwise-ai/
 
   
 
-
-### 🏠 Home Page
+### **🏠 Home Page**
 
 ![Home](./screenshots/home.png)
 
-  
-
-### 📊 Results Page
-
+### **📊 Results Page**
 ![Results](./screenshots/results.png)
 
-  
-
-### 📈 Analytics Dashboard
-
+### **📈 Analytics Dashboard**
 ![Analytics](./screenshots/analytics.png)
 
 ----------
@@ -270,7 +282,7 @@ stackwise-ai/
 
   
 
-### **Backend**
+## **Backend**
 
 -   FastAPI
     
@@ -281,7 +293,7 @@ stackwise-ai/
 
   
 
-### **Frontend**
+## **Frontend**
 
 -   React
     
@@ -296,31 +308,25 @@ stackwise-ai/
 
   
 
-### **Data Processing**
+## **ML & Data**
 
--   Polars
+-   LightGBM (ranking)
     
 -   Pandas
     
+-   Polars
+    
 -   DuckDB
+    
+-   Sentence Transformers (embeddings)
     
 
   
 
-### **Database**
+## **Database**
 
 -   PostgreSQL
     
--   psycopg2
-    
-
-  
-
-### **Testing**
-
--   Pytest
-    
-
 ----------
 
 # **🚀 Getting Started**
@@ -400,51 +406,55 @@ npm run dev
     "backend_framework": "fastapi",
     "database": "postgresql",
     "deployment": "render",
-    "score": 0.82
+    "score": 0.83
   },
-  "confidence": 0.78,
-  "sensitivity": {
-    "stability": 0.67
-  },
-  "pareto": [
-    {"language": "python"},
-    {"language": "go"}
-  ]
+  "confidence": 0.81,
+  "ranking_source": "ml_model"
 }
 ```
 
 ----------
 
-# **🧪 Testing**
+# **📊 ML Evaluation**
 
 ```
-pytest
+GET /ml/evaluation
+```
+
+Returns:
+
+```
+{
+  "ndcg": 0.82,
+  "num_samples": 906,
+  "num_features": 16
+}
 ```
 
 ----------
 
-# **📊 Limitations**
+# **📉 Current Limitations**
 
--   Rule-based scoring (no ML yet)
+-   synthetic feedback data
     
--   Limited stack catalog
+-   limited stack catalog
     
--   Simplified dataset signals
+-   basic embedding model
     
 
 ----------
 
 # **🚀 Future Improvements**
 
--   ML-based ranking (XGBoost / LightGBM)
+-   real user feedback loop
     
--   Feedback-driven learning
+-   advanced embeddings (OpenAI / Instructor)
     
--   Cloud deployment
+-   hybrid ranking (rule + ML fusion)
     
--   Authentication system
+-   cloud deployment (Docker + CI/CD)
     
--   Advanced analytics
+-   user accounts + saved stacks
     
 
 ----------
@@ -453,13 +463,11 @@ pytest
 
   
 
-Aditya Singh
+**Aditya Singh**
 
 ----------
 
 # **📜 License**
-
-  
 
 MIT License
 
@@ -469,16 +477,14 @@ MIT License
 
   
 
-This project focuses on:
+This project demonstrates:
 
--   **explainability over black-box decisions**
+-   **ML system design (ranking + evaluation)**
     
--   **structured engineering thinking**
+-   **full-stack engineering**
     
--   **real-world trade-off analysis**
+-   **data pipeline + feedback loop**
     
-
-----------
-
-
+-   **explainable AI principles**
+    
 
